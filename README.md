@@ -1,59 +1,190 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ⚽ PlayGroundX
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Real-Time Sports Field Booking and Management System
 
-## About Laravel
+PlayGroundX là hệ thống web cho phép người dùng **tìm kiếm, đặt sân thể thao và quản lý lịch đặt sân theo thời gian thực**.
+Hệ thống hỗ trợ **khách hàng, chủ sân và quản trị viên** quản lý hoạt động đặt sân một cách hiệu quả.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# 📌 Mục tiêu hệ thống
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* Tìm kiếm sân thể thao
+* Đặt sân theo khung giờ
+* Quản lý lịch đặt sân
+* Quản lý người dùng
+* Cập nhật trạng thái sân theo thời gian thực
+* Hỗ trợ chủ sân quản lý doanh thu và hoạt động kinh doanh
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# 👥 Đối tượng sử dụng
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 1️⃣ Khách hàng (Customer)
 
-## Laravel Sponsors
+Có thể:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+* Đăng ký tài khoản
+* Đăng nhập
+* Xem danh sách sân
+* Đặt sân
+* Xem lịch đặt sân
+* Đánh giá sân
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 2️⃣ Chủ sân (Owner)
 
-## Contributing
+Có thể:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+* Quản lý sân
+* Thêm / sửa / xóa sân
+* Upload ảnh sân
+* Xem đơn đặt sân
+* Quản lý lịch sân
+* Xem doanh thu
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 3️⃣ Quản trị viên (Admin)
 
-## Security Vulnerabilities
+Có thể:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+* Quản lý người dùng
+* Quản lý sân
+* Quản lý booking
+* Xem thống kê hệ thống
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# ⚙️ Công nghệ sử dụng
+
+## Backend
+
+* Laravel Framework
+* PHP
+* MySQL
+
+## Frontend
+
+* Blade Template
+* JavaScript
+* Bootstrap / TailwindCSS
+
+## Realtime
+
+* Laravel Broadcasting
+* Pusher / WebSocket
+
+## API
+
+* REST API
+* JSON
+
+---
+
+# 🚀 Cài đặt project
+
+## 1️⃣ Clone project
+
+```
+git clone https://github.com/Tahz04/playgroundx.git
+cd playgroundx
+```
+
+---
+
+## 2️⃣ Cài dependencies
+
+```
+composer install
+npm install
+```
+
+---
+
+## 3️⃣ Tạo file môi trường
+
+```
+cp .env.example .env
+```
+
+Sau đó cấu hình database trong `.env`
+
+```
+DB_DATABASE=playgroundx
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+---
+
+## 4️⃣ Generate key
+
+```
+php artisan key:generate
+```
+
+---
+
+## 5️⃣ Chạy migration
+
+```
+php artisan migrate
+```
+
+---
+
+## 6️⃣ Chạy server
+
+```
+php artisan serve
+```
+
+Truy cập:
+
+```
+http://127.0.0.1:8000
+```
+
+---
+
+# 📡 REST API Examples
+
+### Lấy danh sách sân
+
+```
+GET /api/arenas
+```
+
+### Lấy danh sách booking
+
+```
+GET /api/bookings
+```
+
+### Đặt sân
+
+```
+POST /api/bookings
+```
+
+---
+
+# 🌟 Chức năng nâng cao
+
+* Tìm kiếm sân
+* Sắp xếp theo giá
+* Upload ảnh sân
+* Realtime booking
+* Dashboard thống kê
+
+---
+
+# 👨‍💻 Nhóm phát triển
+
+THÀNH
+DUY
+HẰNG
+
+---
