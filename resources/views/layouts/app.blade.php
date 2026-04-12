@@ -66,12 +66,50 @@
                 </ul>
 
                 <div class="nav-actions">
-                    <a href="#" class="btn btn-outline-light btn-nav me-2" id="btnLogin">
-                        <i class="fas fa-sign-in-alt me-1"></i> Đăng Nhập
-                    </a>
-                    <a href="#" class="btn btn-accent btn-nav" id="btnRegister">
-                        <i class="fas fa-user-plus me-1"></i> Đăng Ký
-                    </a>
+                    @guest
+                        <a href="{{ route('login') }}" class="btn btn-outline-light btn-nav me-2" id="btnLogin">
+                            <i class="fas fa-sign-in-alt me-1"></i> Đăng Nhập
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-accent btn-nav" id="btnRegister">
+                            <i class="fas fa-user-plus me-1"></i> Đăng Ký
+                        </a>
+                    @endguest
+
+                    @auth
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-nav dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="userDropdown">
+                                <i class="fas fa-user-circle me-1"></i>
+                                {{ Auth::user()->name }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md);">
+                                <li>
+                                    <span class="dropdown-item-text" style="color: var(--clr-primary-400); font-size: 0.85rem;">
+                                        <i class="fas fa-envelope me-1"></i> {{ Auth::user()->email }}
+                                    </span>
+                                </li>
+                                <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                <li>
+                                    <a class="dropdown-item" href="#" style="color: rgba(255,255,255,0.7);">
+                                        <i class="fas fa-user me-2"></i> Tài Khoản
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" style="color: rgba(255,255,255,0.7);">
+                                        <i class="fas fa-calendar-alt me-2"></i> Lịch Đặt Sân
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item" style="color: #f87171;">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Đăng Xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -79,6 +117,25 @@
 
     <!-- Main Content -->
     <main>
+        <!-- Toast Notification -->
+        @if (session('success'))
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 80px;">
+                <div class="toast show align-items-center border-0" role="alert" style="background: rgba(16,185,129,0.95); color: #fff; border-radius: var(--radius-md); backdrop-filter: blur(10px);">
+                    <div class="d-flex">
+                        <div class="toast-body" style="font-weight: 600;">
+                            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            </div>
+            <script>
+                setTimeout(function() {
+                    document.querySelector('.toast')?.classList.remove('show');
+                }, 4000);
+            </script>
+        @endif
+
         @yield('content')
     </main>
 
