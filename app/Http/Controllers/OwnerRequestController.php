@@ -13,7 +13,7 @@ class OwnerRequestController extends Controller
     {
         $user = Auth::user();
         $ownerRequests = $user->ownerRequests()->latest()->get();
-        $canRequestOwner = (!$user->role || $user->role->name === 'customer')
+        $canRequestOwner = !$user->isOwner()
             && $ownerRequests->where('status', 'pending')->isEmpty();
 
         return view('profile', compact('user', 'ownerRequests', 'canRequestOwner'));

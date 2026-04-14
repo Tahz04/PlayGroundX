@@ -28,7 +28,7 @@
 
     @stack('styles')
 </head>
-<body class="{{ request()->is('ban-do*') ? 'page-map' : (request()->routeIs('profile') ? 'page-profile' : '') }}">
+<body class="{{ request()->is('ban-do*') ? 'page-map' : (request()->routeIs('profile') ? 'page-profile' : (request()->routeIs('owner.*') ? 'page-owner' : '')) }}">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
         <div class="container">
@@ -101,6 +101,11 @@
                                             <i class="fas fa-clipboard-list me-2"></i> Quản Lý Đơn Đặt
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.owner-requests.index') }}" style="color: rgba(255,255,255,0.7);">
+                                            <i class="fas fa-user-check me-2"></i> Yêu Cầu Chủ Sân
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
                                 @endif
                                 <li>
@@ -119,12 +124,24 @@
                                         <i class="fas fa-calendar-alt me-2"></i> Lịch Đặt Sân
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('bookings.my-bookings') }}" style="color: rgba(255,255,255,0.7);">
-                                        <i class="fas fa-calendar-alt me-2"></i> Lịch Sử Đặt Sân
-                                    </a>
-                                </li>
+                                @if(Auth::user()->isOwner())
+                                    <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                    <li>
+                                        <span class="dropdown-item-text" style="color: #10b981; font-size: 0.85rem;">
+                                            <i class="fas fa-crown me-1"></i> Chủ Sân
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('owner.dashboard') }}" style="color: rgba(255,255,255,0.7);">
+                                            <i class="fas fa-chart-line me-2"></i> Bảng Điều Khiển
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('owner.arenas.index') }}" style="color: rgba(255,255,255,0.7);">
+                                            <i class="fas fa-futbol me-2"></i> Quản Lý Sân
+                                        </a>
+                                    </li>
+                                @endif
                                 <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST">

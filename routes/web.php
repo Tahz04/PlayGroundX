@@ -37,12 +37,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/dat-san', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/lich-su-dat-san', [BookingController::class, 'myBookings'])->name('bookings.my-bookings');
 
-        // Profile + Owner request
-        Route::get('/profile', [OwnerRequestController::class, 'profile'])->name('profile');
-        Route::post('/become-owner', [OwnerRequestController::class, 'requestOwner'])->name('owner-requests.store');
-        Route::patch('/profile/password', [OwnerRequestController::class, 'changePassword'])->name('profile.password');
+    // Profile + Owner request
+    Route::get('/profile', [OwnerRequestController::class, 'profile'])->name('profile');
+    Route::post('/become-owner', [OwnerRequestController::class, 'requestOwner'])->name('owner-requests.store');
+    Route::patch('/profile/password', [OwnerRequestController::class, 'changePassword'])->name('profile.password');
 
-        // Quản lý sân (Chỉ dành cho Admin)
+    // Quản lý sân (Chỉ dành cho Chủ sân)
+    Route::middleware(['role:owner'])->prefix('owner')->name('owner.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\OwnerDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('arenas', \App\Http\Controllers\OwnerArenaController::class);
+    });
+
+    // Quản lý sân (Chỉ dành cho Admin)
         Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
             Route::resource('arenas', \App\Http\Controllers\ArenaController::class);
             

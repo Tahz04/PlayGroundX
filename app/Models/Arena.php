@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Arena extends Model
 {
     protected $fillable = [
+        'owner_id',
         'name',
         'type',
         'location',
@@ -15,4 +16,9 @@ class Arena extends Model
         'longitude',
         'status',
     ];
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

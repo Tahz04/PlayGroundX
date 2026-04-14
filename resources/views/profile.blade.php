@@ -31,8 +31,8 @@
                     </div>
                     <div class="mb-4">
                         <p class="text-muted mb-1">Trạng thái</p>
-                        <span class="badge rounded-pill px-3 py-2 {{ $user->status === 'pending_owner' ? 'bg-warning text-dark' : 'bg-success' }}">
-                            {{ $user->status === 'pending_owner' ? 'Chờ duyệt chủ sân' : 'Hoạt động' }}
+                        <span class="badge rounded-pill px-3 py-2 {{ $user->role && $user->role->name === 'owner' ? 'bg-primary text-white' : ($user->status === 'pending_owner' ? 'bg-warning text-dark' : 'bg-success') }}">
+                            {{ $user->role && $user->role->name === 'owner' ? 'Chủ sân' : ($user->status === 'pending_owner' ? 'Chờ duyệt chủ sân' : 'Hoạt động') }}
                         </span>
                     </div>
                     @if($user->role && $user->role->name === 'owner')
@@ -93,6 +93,24 @@
                     </div>
                 @elseif($ownerRequests->where('status', 'pending')->isNotEmpty())
                     <div class="alert alert-warning rounded-4">Bạn đã gửi yêu cầu trở thành chủ sân và đang chờ duyệt.</div>
+                @endif
+
+                @if($user->role && $user->role->name === 'owner')
+                    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h5 class="mb-1">Giao diện chủ sân</h5>
+                                    <p class="text-muted mb-0">Bạn đã là chủ sân, hãy sử dụng bảng điều khiển để quản lý sân và theo dõi đơn đặt.</p>
+                                </div>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill py-2 px-3">Chủ sân</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ route('owner.dashboard') }}" class="btn btn-hero-primary">Bảng Điều Khiển</a>
+                                <a href="{{ route('owner.arenas.index') }}" class="btn btn-hero-primary">Quản Lý Sân</a>
+                            </div>
+                        </div>
+                    </div>
                 @endif
 
                 @if($ownerRequests->isNotEmpty())

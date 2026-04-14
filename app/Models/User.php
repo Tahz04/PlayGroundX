@@ -40,9 +40,19 @@ class User extends Authenticatable
         return $this->hasMany(OwnerRequest::class);
     }
 
+    public function arenas()
+    {
+        return $this->hasMany(Arena::class, 'owner_id');
+    }
+
     public function isAdmin()
     {
         return $this->role && $this->role->name === 'admin';
+    }
+
+    public function isOwner()
+    {
+        return $this->role && $this->role->name === 'owner';
     }
 
     /**
