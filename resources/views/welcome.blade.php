@@ -33,18 +33,18 @@
             </div>
 
             <h1 class="hero-title">
-                Đặt Sân Bóng<br>
+                Đặt Sân Bóng Đá<br>
                 <span class="highlight" id="heroTyping">Nhanh Chóng</span>
                 <span class="typing-cursor" style="color: var(--clr-primary-400); animation: blink 1s step-end infinite;">|</span>
             </h1>
 
             <p class="hero-subtitle">
-                Khám phá hàng trăm sân bóng chất lượng cao trên toàn quốc. 
+                Khám phá hàng trăm sân bóng đá chất lượng cao trên toàn quốc. 
                 Đặt sân chỉ với vài cú click, thanh toán an toàn, chơi bóng ngay!
             </p>
 
             <div class="hero-actions">
-                <a href="#san-bong" class="btn-hero-primary">
+                <a href="{{ route('map') }}" class="btn-hero-primary">
                     <i class="fas fa-search"></i>
                     Tìm Sân Ngay
                 </a>
@@ -57,7 +57,7 @@
             <div class="hero-stats" data-aos="fade-up" data-aos-delay="200">
                 <div class="stat-item">
                     <span class="stat-number" data-count="500" data-suffix="+">0</span>
-                    <span class="stat-label">Sân Bóng</span>
+                    <span class="stat-label">Sân Bóng Đá</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number" data-count="25000" data-suffix="+">0</span>
@@ -166,7 +166,7 @@
                     <span>Tại sao chọn chúng tôi</span>
                 </div>
                 <h2 class="section-title">Trải Nghiệm Đặt Sân <span class="accent">Vượt Trội</span></h2>
-                <p class="section-desc">PlayGroundX mang đến giải pháp đặt sân thông minh, hiện đại và tiện lợi nhất cho người chơi bóng</p>
+                <p class="section-desc">PlayGroundX mang đến giải pháp đặt sân thông minh, hiện đại và tiện lợi nhất cho người chơi bóng đá</p>
             </div>
 
             <div class="row g-4">
@@ -226,90 +226,41 @@
             </div>
 
             <div class="row g-4">
-                <!-- Pitch 1 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="0">
-                    <div class="pitch-card">
-                        <div class="pitch-image">
-                            <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&h=400&fit=crop" alt="Sân bóng Phú Mỹ Hưng">
-                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Còn trống</span>
-                            <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>Sân 7</span>
-                            <div class="pitch-overlay"></div>
-                        </div>
-                        <div class="pitch-info">
-                            <h3 class="pitch-name">Sân Bóng Phú Mỹ Hưng</h3>
-                            <div class="pitch-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Quận 7, TP. Hồ Chí Minh</span>
+                @forelse($arenas as $arena)
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                        <div class="pitch-card">
+                            <div class="pitch-image">
+                                <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&h=400&fit=crop" alt="{{ $arena->name }}">
+                                <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
+                                <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
+                                <div class="pitch-overlay"></div>
                             </div>
-                            <div class="pitch-meta">
-                                <div class="pitch-price">350.000đ <span>/ 90 phút</span></div>
-                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.8</div>
+                            <div class="pitch-info">
+                                <h3 class="pitch-name">{{ $arena->name }}</h3>
+                                <div class="pitch-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ $arena->location }}</span>
+                                </div>
+                                <div class="pitch-meta">
+                                    <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
+                                    <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
+                                </div>
+                                <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
+                                    <i class="fas fa-calendar-check"></i>
+                                    Đặt Sân Ngay
+                                </a>
                             </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-check"></i>
-                                Đặt Sân Ngay
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pitch 2 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="pitch-card">
-                        <div class="pitch-image">
-                            <img src="https://images.unsplash.com/photo-1551958219-acbc608c6377?w=600&h=400&fit=crop" alt="Sân bóng Thảo Điền">
-                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Còn trống</span>
-                            <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>Sân 5</span>
-                            <div class="pitch-overlay"></div>
-                        </div>
-                        <div class="pitch-info">
-                            <h3 class="pitch-name">Sân Bóng Thảo Điền</h3>
-                            <div class="pitch-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>TP. Thủ Đức, TP.HCM</span>
-                            </div>
-                            <div class="pitch-meta">
-                                <div class="pitch-price">280.000đ <span>/ 90 phút</span></div>
-                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.7</div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-check"></i>
-                                Đặt Sân Ngay
-                            </a>
                         </div>
                     </div>
-                </div>
-
-                <!-- Pitch 3 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="pitch-card">
-                        <div class="pitch-image">
-                            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop" alt="Sân bóng Tân Sơn Nhất">
-                            <span class="pitch-badge busy"><i class="fas fa-clock me-1"></i>Sắp trống</span>
-                            <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>Sân 11</span>
-                            <div class="pitch-overlay"></div>
-                        </div>
-                        <div class="pitch-info">
-                            <h3 class="pitch-name">Sân Bóng Tân Sơn Nhất</h3>
-                            <div class="pitch-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Quận Tân Bình, TP.HCM</span>
-                            </div>
-                            <div class="pitch-meta">
-                                <div class="pitch-price">500.000đ <span>/ 90 phút</span></div>
-                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
-                            </div>
-                            <a href="#" class="btn-book">
-                                <i class="fas fa-calendar-check"></i>
-                                Đặt Sân Ngay
-                            </a>
-                        </div>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted">Đang cập nhật danh sách sân...</p>
                     </div>
-                </div>
+                @endforelse
             </div>
 
             <div class="text-center mt-5" data-aos="fade-up">
-                <a href="#" class="btn-hero-secondary" style="color: var(--clr-dark-900); border-color: var(--clr-dark-300);">
+                <a href="{{ route('arenas.index') }}" class="btn-hero-secondary" style="color: var(--clr-dark-900); border-color: var(--clr-dark-300);">
                     <i class="fas fa-th-large"></i>
                     Xem Tất Cả Sân Bóng
                     <i class="fas fa-arrow-right"></i>

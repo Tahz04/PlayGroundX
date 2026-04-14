@@ -7,7 +7,7 @@
     <meta name="keywords" content="đặt sân bóng, sân bóng đá, thuê sân bóng, đặt sân online">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'PlayGroundX - Đặt Sân Bóng Đá Trực Tuyến')</title>
+    <title>@yield('title', 'PlayGroundX - Hệ Thống Đặt Sân Bóng Đá Trực Tuyến')</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,10 +49,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#san-bong">
-                            <i class="fas fa-map-marker-alt me-1"></i> Sân Bóng
+                        <a class="nav-link {{ request()->is('ban-do') ? 'active' : '' }}" href="{{ route('map') }}">
+                            <i class="fas fa-map-marked-alt me-1"></i> Bản Đồ
                         </a>
                     </li>
+                    <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('arenas.index') ? 'active' : '' }}" href="{{ route('arenas.index') }}">
+                        <i class="fas fa-futbol me-1 d-lg-none d-xl-inline"></i> Sân Bóng
+                    </a>
+                </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#bang-gia">
                             <i class="fas fa-tags me-1"></i> Bảng Giá
@@ -82,6 +87,22 @@
                                 {{ Auth::user()->name }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md);">
+                                @if(Auth::user()->isAdmin())
+                                    <span class="dropdown-item-text" style="color: #fbbf24; font-size: 0.85rem;">
+                                        <i class="fas fa-user-shield me-1"></i> Quản trị viên
+                                    </span>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.arenas.index') }}" style="color: rgba(255,255,255,0.7);">
+                                            <i class="fas fa-cog me-2"></i> Quản Lý Sân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.bookings.index') }}" style="color: rgba(255,255,255,0.7);">
+                                            <i class="fas fa-clipboard-list me-2"></i> Quản Lý Đơn Đặt
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                @endif
                                 <li>
                                     <span class="dropdown-item-text" style="color: var(--clr-primary-400); font-size: 0.85rem;">
                                         <i class="fas fa-envelope me-1"></i> {{ Auth::user()->email }}
@@ -100,9 +121,15 @@
                                 </li>
                                 <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
                                 <li>
-                                    <form method="POST" action="{{ route('logout') }}">
+                                    <a class="dropdown-item" href="{{ route('bookings.my-bookings') }}" style="color: rgba(255,255,255,0.7);">
+                                        <i class="fas fa-calendar-alt me-2"></i> Lịch Sử Đặt Sân
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="dropdown-item" style="color: #f87171;">
+                                        <button type="submit" class="dropdown-item text-danger">
                                             <i class="fas fa-sign-out-alt me-2"></i> Đăng Xuất
                                         </button>
                                     </form>
