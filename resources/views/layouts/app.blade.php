@@ -28,7 +28,7 @@
 
     @stack('styles')
 </head>
-<body>
+<body class="{{ request()->is('ban-do*') ? 'page-map' : (request()->routeIs('profile') ? 'page-profile' : '') }}">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
         <div class="container">
@@ -110,12 +110,12 @@
                                 </li>
                                 <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
                                 <li>
-                                    <a class="dropdown-item" href="#" style="color: rgba(255,255,255,0.7);">
+                                    <a class="dropdown-item" href="{{ route('profile') }}" style="color: rgba(255,255,255,0.7);">
                                         <i class="fas fa-user me-2"></i> Tài Khoản
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" style="color: rgba(255,255,255,0.7);">
+                                    <a class="dropdown-item" href="{{ route('bookings.my-bookings') }}" style="color: rgba(255,255,255,0.7);">
                                         <i class="fas fa-calendar-alt me-2"></i> Lịch Đặt Sân
                                     </a>
                                 </li>

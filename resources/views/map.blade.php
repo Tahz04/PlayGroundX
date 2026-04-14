@@ -39,7 +39,7 @@
 
         .sidebar-header {
             padding: 1.5rem;
-            background: var(--gradient-primary);
+            background: var(--clr-primary-500);
             color: #fff;
         }
 
@@ -98,7 +98,7 @@
 
         .court-item.active {
             border-color: var(--clr-primary-500);
-            background: rgba(59, 130, 246, 0.05);
+            background: rgba(16, 185, 129, 0.08);
         }
 
         .court-item-name {
@@ -155,7 +155,12 @@
             max-height: 400px;
             overflow-y: auto;
             width: 320px !important;
-            border: none !important;
+            border: 1px solid rgba(16, 185, 129, 0.15) !important;
+        }
+
+        .leaflet-routing-container .leaflet-routing-alternatives-container,
+        .leaflet-routing-container .leaflet-routing-error {
+            color: var(--clr-dark-900);
         }
 
         .routing-panel-toggle {
@@ -164,12 +169,18 @@
             right: 20px;
             z-index: 1000;
             padding: 10px 20px;
-            background: white;
+            background: var(--clr-primary-500);
+            color: #fff;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             font-weight: 600;
             cursor: pointer;
             display: none;
+            transition: background 0.2s ease;
+        }
+
+        .routing-panel-toggle:hover {
+            background: var(--clr-primary-600);
         }
 
         @media (max-width: 768px) {

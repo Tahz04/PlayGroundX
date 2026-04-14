@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\OwnerRequestController;
 use Illuminate\Support\Facades\Route;
 
 // Trang chủ
@@ -35,12 +37,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/dat-san', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/lich-su-dat-san', [BookingController::class, 'myBookings'])->name('bookings.my-bookings');
 
-    // Quản lý sân (Chỉ dành cho Admin)
-    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::resource('arenas', \App\Http\Controllers\ArenaController::class);
-        
-        // Quản lý đơn đặt sân
-        Route::get('/bookings', [\App\Http\Controllers\AdminBookingController::class, 'index'])->name('bookings.index');
-        Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
+        // Profile + Owner request
+        Route::get('/profile', [OwnerRequestController::class, 'profile'])->name('profile');
+        Route::post('/become-owner', [OwnerRequestController::class, 'requestOwner'])->name('owner-requests.store');
+        Route::patch('/profile/password', [OwnerRequestController::class, 'changePassword'])->name('profile.password');
+
+        // Quản lý sân (Chỉ dành cho Admin)
+        Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+            Route::resource('arenas', \App\Http\Controllers\ArenaController::class);
+            
+            // Quản lý đơn đặt sân
+            Route::get('/bookings', [\App\Http\Controllers\AdminBookingController::class, 'index'])->name('bookings.index');
+            Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
+
+            // Quản lý yêu cầu trở thành chủ sân
+            Route::get('/owner-requests', [AdminController::class, 'index'])->name('owner-requests.index');
+            Route::patch('/owner-requests/{ownerRequest}/approve', [AdminController::class, 'approve'])->name('owner-requests.approve');
+            Route::patch('/owner-requests/{ownerRequest}/reject', [AdminController::class, 'reject'])->name('owner-requests.reject');
+        });
     });
-});

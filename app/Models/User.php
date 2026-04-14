@@ -7,6 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Role;
+use App\Models\OwnerRequest;
 
 class User extends Authenticatable
 {
@@ -25,11 +27,17 @@ class User extends Authenticatable
         'password',
         'avatar',
         'role_id',
+        'status',
     ];
 
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function ownerRequests()
+    {
+        return $this->hasMany(OwnerRequest::class);
     }
 
     public function isAdmin()
