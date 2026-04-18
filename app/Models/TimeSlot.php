@@ -10,6 +10,11 @@ class TimeSlot extends Model
 
     public function formattedTime()
     {
-        return date('H:i', strtotime($this->start_time)) . ' - ' . date('H:i', strtotime($this->end_time));
+        $start = date('H:i', strtotime($this->start_time));
+        $end = $this->end_time === '00:00:00'
+            ? '24:00'
+            : date('H:i', strtotime($this->end_time));
+
+        return $start . ' - ' . $end;
     }
 }

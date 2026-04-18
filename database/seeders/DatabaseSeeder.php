@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             AdminUserSeeder::class,
+            TimeSlotSeeder::class,
         ]);
 
         $customerRoleId = Role::where('name', 'customer')->value('id');

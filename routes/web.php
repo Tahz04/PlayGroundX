@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     // Booking
     Route::get('/dat-san/{arena}', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/dat-san', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/hoa-don-dat-san', [BookingController::class, 'bill'])->name('bookings.bill');
+    Route::get('/thanh-toan/chuyen-khoan', [BookingController::class, 'paymentTransfer'])->name('bookings.payment-transfer');
     Route::get('/lich-su-dat-san', [BookingController::class, 'myBookings'])->name('bookings.my-bookings');
 
     // Profile + Owner request

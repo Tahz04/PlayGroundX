@@ -13,18 +13,17 @@ class TimeSlotSeeder extends Seeder
      */
     public function run(): void
     {
-        $slots = [
-            ['start_time' => '06:00:00', 'end_time' => '07:30:00'],
-            ['start_time' => '07:30:00', 'end_time' => '09:00:00'],
-            ['start_time' => '09:00:00', 'end_time' => '10:30:00'],
-            ['start_time' => '16:00:00', 'end_time' => '17:30:00'],
-            ['start_time' => '17:30:00', 'end_time' => '19:00:00'],
-            ['start_time' => '19:00:00', 'end_time' => '20:30:00'],
-            ['start_time' => '20:30:00', 'end_time' => '22:00:00'],
-        ];
+        for ($hour = 6; $hour < 24; $hour++) {
+            $startTime = sprintf('%02d:00:00', $hour);
+            $endTime = $hour === 23 ? '00:00:00' : sprintf('%02d:00:00', $hour + 1);
 
-        foreach ($slots as $slot) {
-            TimeSlot::create($slot);
+            TimeSlot::updateOrCreate(
+                [
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                ],
+                []
+            );
         }
     }
 }
