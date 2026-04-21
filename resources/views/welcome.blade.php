@@ -32,6 +32,11 @@
                 <span>#1 Nền tảng đặt sân tại Việt Nam</span>
             </div>
 
+            <div class="promotion-badge mt-3 mb-3" data-aos="fade-left" data-aos-delay="500">
+                <i class="fas fa-gift text-warning me-2"></i>
+                <span class="text-white fw-bold">SIÊU ƯU ĐÃI: Giảm ngay 10% khi đặt từ 3 giờ trở lên!</span>
+            </div>
+
             <h1 class="hero-title">
                 Đặt Sân Bóng Đá<br>
                 <span class="highlight" id="heroTyping">Nhanh Chóng</span>
@@ -454,7 +459,8 @@
                     Sẵn Sàng Cho Trận Đấu Tiếp Theo?
                 </h2>
                 <p class="cta-desc">
-                    Đăng ký miễn phí ngay hôm nay và nhận ưu đãi giảm 20% cho lần đặt sân đầu tiên!
+                    Đăng ký miễn phí ngay hôm nay và nhận ưu đãi giảm 20% cho lần đặt sân đầu tiên! 
+                    Đặc biệt, <span class="fw-bold text-warning">giảm thêm 10%</span> cho mọi lượt đặt sân từ 3 tiếng trở lên.
                 </p>
                 <a href="#" class="btn-cta">
                     <i class="fas fa-rocket"></i>
@@ -577,6 +583,24 @@
     </button>
 
     <style>
+        .promotion-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(255, 193, 7, 0.3); }
+            50% { border-color: rgba(255, 193, 7, 1); box-shadow: 0 0 15px rgba(255, 193, 7, 0.4); }
+            100% { border-color: rgba(255, 193, 7, 0.3); }
+        }
+
         .btn-back-to-top {
             position: fixed;
             bottom: 2rem;

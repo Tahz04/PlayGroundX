@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/hoa-don-dat-san', [BookingController::class, 'bill'])->name('bookings.bill');
     Route::get('/thanh-toan/chuyen-khoan', [BookingController::class, 'paymentTransfer'])->name('bookings.payment-transfer');
     Route::get('/lich-su-dat-san', [BookingController::class, 'myBookings'])->name('bookings.my-bookings');
+    Route::delete('/dat-san/{booking}/huy', [BookingController::class, 'cancel'])->name('bookings.user-cancel');
+    Route::get('/api/booked-slots/{arena}', [BookingController::class, 'getBookedSlots'])->name('bookings.booked-slots');
 
     // Profile + Owner request
     Route::get('/profile', [OwnerRequestController::class, 'profile'])->name('profile');
@@ -48,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:owner'])->prefix('owner')->name('owner.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\OwnerDashboardController::class, 'index'])->name('dashboard');
         Route::resource('arenas', \App\Http\Controllers\OwnerArenaController::class);
+        Route::get('/bookings', [\App\Http\Controllers\OwnerBookingController::class, 'index'])->name('bookings.index');
+        Route::patch('/bookings/{booking}/confirm', [\App\Http\Controllers\OwnerBookingController::class, 'confirm'])->name('bookings.confirm');
+        Route::patch('/bookings/{booking}/cancel', [\App\Http\Controllers\OwnerBookingController::class, 'cancel'])->name('bookings.cancel');
     });
 
     // Quản lý sân (Chỉ dành cho Admin)

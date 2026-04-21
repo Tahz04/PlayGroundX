@@ -13,6 +13,18 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+                <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+            </div>
+        @endif
+
         <div class="row g-4">
         @forelse($bookings as $booking)
             <div class="col-lg-6">
@@ -59,7 +71,17 @@
 
                                 @if($booking->status == 'pending')
                                     <div class="mt-4 text-end">
-                                        <button class="btn btn-outline-danger btn-sm rounded-pill">Hủy yêu cầu</button>
+                                        <form action="{{ route('bookings.user-cancel', $booking) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn hủy yêu cầu này?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Hủy yêu cầu</button>
+                                        </form>
+                                    </div>
+                                @elseif($booking->status == 'confirmed' || $booking->status == 'paid')
+                                    <div class="mt-4 text-end">
+                                        <a href="https://zalo.me/0986049032" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                            <i class="fas fa-comments me-1"></i> Thương lượng
+                                        </a>
                                     </div>
                                 @endif
                             </div>

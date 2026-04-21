@@ -15,6 +15,9 @@
                 <a href="{{ route('owner.arenas.create') }}" class="btn btn-hero-primary btn-lg">
                     <i class="fas fa-plus me-2"></i> Thêm Sân Mới
                 </a>
+                <a href="{{ route('owner.bookings.index') }}" class="btn btn-outline-primary btn-lg ms-2">
+                    <i class="fas fa-list me-2"></i> Danh Sách Đơn
+                </a>
             </div>
         </div>
 

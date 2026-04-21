@@ -495,18 +495,18 @@
                                 <span class="distance-value">0 km</span>
                             </div>
                         </div>
-
                         <div class="court-footer">
                             <div class="court-price">
-                                {{ number_format($arena->price, 0, ',', '.') }}đ
+                                {{ number_format($arena->price, 0, ',', '.') }}đ 
+                                <small class="text-muted" style="font-size: 0.7rem;">/ giờ</small>
                             </div>
                             <button class="btn-direction" type="button" 
-                                    onclick="event.stopPropagation(); window.getDirections({{ $arena->latitude }}, {{ $arena->longitude }}, '{{ $arena->name }}')">
+                                    onclick="event.stopPropagation(); window.getDirections({{ $arena->latitude }}, {{ $arena->longitude }}, '{{ addslashes($arena->name) }}')">
                                 <i class="fas fa-directions"></i> Chỉ đường
                             </button>
                         </div>
                     </div>
-                @endforeach
+@endforeach
             </div>
         </aside>
 
@@ -600,7 +600,10 @@
                         <div style="font-weight: 800; font-size: 1.1rem; color: #1e293b; margin-bottom: 4px;">${arena.name}</div>
                         <div style="color: #10b981; font-weight: 700; font-size: 0.8rem; margin-bottom: 12px;">${arena.type}</div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f1f5f9; padding-top: 12px; margin-top: 8px;">
-                            <span style="font-weight: 800; font-size: 1rem; color: #1e293b;">${new Intl.NumberFormat('vi-VN').format(arena.price)}đ</span>
+                            <div>
+                                <span style="font-weight: 800; font-size: 1rem; color: #1e293b;">${new Intl.NumberFormat('vi-VN').format(arena.price)}đ</span>
+                                <div style="font-size: 0.65rem; color: #64748b;">/ giờ</div>
+                            </div>
                             <button onclick="window.getDirections(${arena.latitude}, ${arena.longitude}, '${arena.name.replace(/'/g, "\\'")}')" 
                                 class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px;">
                                 <i class="fas fa-directions"></i> Chỉ đường

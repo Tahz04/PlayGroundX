@@ -38,8 +38,8 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="bg-light rounded-3 p-3 h-100">
-                                    <div class="text-muted small">Số giờ</div>
-                                    <div class="fw-semibold">{{ $bookings->count() }} giờ</div>
+                                    <div class="text-muted small">Thời lượng</div>
+                                    <div class="fw-semibold">{{ ($bookings->count() * 30) / 60 }} giờ</div>
                                 </div>
                             </div>
                             <div class="col-md-4">

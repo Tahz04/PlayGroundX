@@ -16,7 +16,20 @@
                             <p class="text-white-50"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $arena->location }}</p>
                         </div>
                         <div class="pricing-info mb-5">
-                            <h3 class="fw-bold text-primary">{{ number_format($arena->price) }}đ <small class="text-white-50 fs-6">/ 90 phút</small></h3>
+                            <h3 class="fw-bold text-primary" id="base-price-display">
+                                {{ number_format($arena->price) }}đ 
+                                <small class="text-white-50 fs-6">/ giờ</small>
+                            </h3>
+                            <div id="total-price-preview" class="mt-3 p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25" style="display: none;">
+                                <div class="text-white-50 small mb-1">Tổng cộng tạm tính</div>
+                                <div class="text-white fw-bold h4 mb-0" id="calculated-price">0đ</div>
+                                <div class="text-primary-light small mt-1" id="calculated-duration">0 phút</div>
+                            </div>
+                            <div id="promo-notice" class="mt-2 p-2 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25" style="display: none;">
+                                <div class="text-success small fw-bold">
+                                    <i class="fas fa-percentage me-1"></i> Áp dụng ưu đãi giảm 10% cho trận đấu từ 3h!
+                                </div>
+                            </div>
                         </div>
                         <ul class="list-unstyled mb-0">
                             <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i>Sân cỏ nhân tạo đạt chuẩn</li>
@@ -66,9 +79,12 @@
                                             <select class="form-select form-select-lg" id="start_hour" name="start_hour" required>
                                                 <option value="">-- Chọn giờ bắt đầu --</option>
                                                 @for($hour = 6; $hour <= 23; $hour++)
-                                                    <option value="{{ $hour }}" {{ (int) old('start_hour', 6) === $hour ? 'selected' : '' }}>
-                                                        {{ sprintf('%02d:00', $hour) }}
-                                                    </option>
+                                                    @foreach(['00', '30'] as $min)
+                                                        @php $time = sprintf('%02d:%s', $hour, $min); @endphp
+                                                        <option value="{{ $time }}" data-slot-id="{{ $timeSlots->where('start_time', $time.':00')->first()?->id }}" {{ old('start_hour', '06:00') === $time ? 'selected' : '' }}>
+                                                            {{ $time }}
+                                                        </option>
+                                                    @endforeach
                                                 @endfor
                                             </select>
                                         </div>
@@ -76,10 +92,18 @@
                                             <label for="end_hour" class="form-label fw-semibold">Giờ kết thúc</label>
                                             <select class="form-select form-select-lg" id="end_hour" name="end_hour" required>
                                                 <option value="">-- Chọn giờ kết thúc --</option>
-                                                @for($hour = 7; $hour <= 24; $hour++)
-                                                    <option value="{{ $hour }}" {{ (int) old('end_hour', 7) === $hour ? 'selected' : '' }}>
-                                                        {{ sprintf('%02d:00', $hour) }}
-                                                    </option>
+                                                @for($hour = 6; $hour <= 23; $hour++)
+                                                    @foreach(['00', '30'] as $min)
+                                                        @php 
+                                                            $nextMin = (int)$min + 30;
+                                                            $nextHour = $nextMin >= 60 ? $hour + 1 : $hour;
+                                                            $nextMin = $nextMin >= 60 ? 0 : $nextMin;
+                                                            $time = sprintf('%02d:%02d', $nextHour, $nextMin);
+                                                        @endphp
+                                                        <option value="{{ $time }}" data-slot-id="{{ $timeSlots->where('end_time', ($time === '24:00' ? '00:00:00' : $time.':00'))->first()?->id }}" {{ old('end_hour', '07:00') === $time ? 'selected' : '' }}>
+                                                            {{ $time }}
+                                                        </option>
+                                                    @endforeach
                                                 @endfor
                                             </select>
                                         </div>
@@ -173,48 +197,125 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmBtn = document.getElementById('confirm-booking-btn');
     const preview = document.getElementById('booking-range-preview');
     const paymentOptions = document.querySelectorAll('input[name="payment_method"]');
+    
+    // Price preview elements
+    const pricePreview = document.getElementById('total-price-preview');
+    const calculatedPrice = document.getElementById('calculated-price');
+    const calculatedDuration = document.getElementById('calculated-duration');
+
+    const arenaPrice = {{ $arena->price }};
+    const arenaDuration = 60; // 60 minutes for hourly pricing
 
     if (!form || !startSelect || !endSelect || !confirmBtn) {
         return;
     }
 
+    const timeToMinutes = (timeStr) => {
+        if (!timeStr) return 0;
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    };
+
+    const dateInput = document.getElementById('date');
+    const bookedSlotIds = @json($bookedSlotIds);
+
+    const updateBookedSlots = (bookedIds) => {
+        // We need to disable options that correspond to booked slots
+        // This is complex because a booking might block multiple 30-min slots
+        for (const option of startSelect.options) {
+            const slotId = parseInt(option.dataset.slotId);
+            if (bookedIds.includes(slotId)) {
+                option.disabled = true;
+                option.classList.add('text-muted');
+                option.innerHTML += ' (Hết)';
+            } else {
+                option.disabled = false;
+                option.classList.remove('text-muted');
+                option.innerHTML = option.value;
+            }
+        }
+        
+        // Similar for endSelect but end time represents the end of the slot
+        // If 06:00-06:30 is booked, 06:30 is the earliest available start
+        // And 06:30 is NOT a valid end for a NEW booking starting at 06:00
+        syncEndOptions();
+    };
+
+    // Initialize with data from server
+    updateBookedSlots(bookedSlotIds);
+
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            const date = this.value;
+            fetch(`{{ route('bookings.booked-slots', $arena) }}?date=${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateBookedSlots(data.bookedSlotIds);
+                    setButtonState();
+                });
+        });
+    }
+
     const setButtonState = () => {
-        const startHour = Number(startSelect.value);
-        const endHour = Number(endSelect.value);
+        const startVal = startSelect.value;
+        const endVal = endSelect.value;
+        
+        const startMinutes = timeToMinutes(startVal);
+        const endMinutes = timeToMinutes(endVal);
+        
         const hasPaymentMethod = Array.from(paymentOptions).some(option => option.checked);
 
-        if (!startSelect.value || !endSelect.value) {
+        if (!startVal || !endVal) {
             confirmBtn.disabled = true;
             if (preview) {
                 preview.textContent = 'Vui lòng chọn đủ giờ bắt đầu và giờ kết thúc.';
                 preview.classList.remove('text-danger');
             }
+            pricePreview.style.display = 'none';
             return;
         }
 
-        const isValid = endHour > startHour;
+        const duration = endMinutes - startMinutes;
+        const isValid = duration >= 60; // Minimum 1 hour
 
         confirmBtn.disabled = !isValid || !hasPaymentMethod;
-        if (preview) {
-            preview.textContent = isValid
-                ? 'Bạn đang đặt từ ' + String(startHour).padStart(2, '0') + ':00 đến ' + String(endHour).padStart(2, '0') + ':00.'
-                : 'Giờ kết thúc phải lớn hơn giờ bắt đầu (tối thiểu 1 tiếng).';
-            preview.classList.toggle('text-danger', !isValid);
+        
+        if (isValid) {
+            preview.textContent = 'Bạn đang đặt từ ' + startVal + ' đến ' + endVal + '.';
+            preview.classList.remove('text-danger');
+
+            // Calculate Price
+            let totalPrice = (duration / arenaDuration) * arenaPrice;
+            
+            // Promotion Logic
+            const promoNotice = document.getElementById('promo-notice');
+            if (duration >= 180) {
+                totalPrice = totalPrice * 0.9;
+                promoNotice.style.display = 'block';
+            } else {
+                promoNotice.style.display = 'none';
+            }
+
+            calculatedPrice.textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + 'đ';
+            calculatedDuration.textContent = duration + ' phút (' + (duration/60).toFixed(1) + ' giờ)';
+            pricePreview.style.display = 'block';
+        } else {
+            preview.textContent = duration <= 0 
+                ? 'Giờ kết thúc phải lớn hơn giờ bắt đầu.' 
+                : 'Thời gian đặt tối thiểu là 60 phút (hiện tại: ' + duration + ' phút).';
+            preview.classList.add('text-danger');
+            pricePreview.style.display = 'none';
         }
     };
 
     const syncEndOptions = function () {
-        const hasStart = startSelect.value !== '';
-        const startHour = hasStart ? Number(startSelect.value) : 0;
+        const startVal = startSelect.value;
+        const startMinutes = timeToMinutes(startVal);
 
         for (const option of endSelect.options) {
-            if (!option.value) {
-                option.disabled = false;
-                continue;
-            }
-
-            const endHour = Number(option.value);
-            option.disabled = hasStart && endHour <= startHour;
+            if (!option.value) continue;
+            const endMinutes = timeToMinutes(option.value);
+            option.disabled = startVal && endMinutes <= startMinutes;
         }
 
         if (endSelect.selectedOptions.length > 0 && endSelect.selectedOptions[0].disabled) {

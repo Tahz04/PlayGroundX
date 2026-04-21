@@ -29,7 +29,7 @@
                                 @enderror
                             </div>
 
-                            <div class="row g-3 mb-4">
+                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label for="type" class="form-label fw-bold">Loại Sân <span class="text-danger">*</span></label>
                                     <select name="type" id="type" class="form-select @error('type') is-invalid @enderror">

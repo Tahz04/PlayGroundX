@@ -16,11 +16,37 @@ class BookingController extends Controller
     /**
      * Show the booking form/page for a specific arena.
      */
-    public function create(Arena $arena)
+    public function create(Request $request, Arena $arena)
     {
+        $date = $request->input('date', date('Y-m-d'));
         $timeSlots = $this->getStandardOrderedSlots();
 
-        return view('bookings.create', compact('arena', 'timeSlots'));
+        // Fetch booked slots for this arena on this date
+        $bookedSlotIds = Booking::where('arena_id', $arena->id)
+            ->where('date', $date)
+            ->whereIn('status', ['pending', 'confirmed', 'paid'])
+            ->pluck('time_slot_id')
+            ->toArray();
+
+        return view('bookings.create', compact('arena', 'timeSlots', 'bookedSlotIds', 'date'));
+    }
+
+    /**
+     * AJAX endpoint to get booked slots for a date.
+     */
+    public function getBookedSlots(Request $request, Arena $arena)
+    {
+        $date = $request->input('date', date('Y-m-d'));
+        
+        $bookedSlotIds = Booking::where('arena_id', $arena->id)
+            ->where('date', $date)
+            ->whereIn('status', ['pending', 'confirmed', 'paid'])
+            ->pluck('time_slot_id')
+            ->toArray();
+
+        return response()->json([
+            'bookedSlotIds' => $bookedSlotIds
+        ]);
     }
 
     /**
@@ -31,62 +57,56 @@ class BookingController extends Controller
         $request->validate([
             'arena_id' => 'required|exists:arenas,id',
             'date' => 'required|date|after_or_equal:today',
-            'start_hour' => 'required|integer|min:6|max:23',
-            'end_hour' => 'required|integer|min:7|max:24',
+            'start_hour' => 'required',
+            'end_hour' => 'required',
             'payment_method' => 'required|in:cash,bank_transfer',
         ], [
             'start_hour.required' => 'Vui lòng chọn giờ bắt đầu.',
-            'start_hour.integer' => 'Giờ bắt đầu không hợp lệ.',
-            'start_hour.min' => 'Giờ bắt đầu phải từ 06:00 trở đi.',
-            'start_hour.max' => 'Giờ bắt đầu tối đa là 23:00.',
             'end_hour.required' => 'Vui lòng chọn giờ kết thúc.',
-            'end_hour.integer' => 'Giờ kết thúc không hợp lệ.',
-            'end_hour.min' => 'Giờ kết thúc phải từ 07:00 trở đi.',
-            'end_hour.max' => 'Giờ kết thúc tối đa là 24:00.',
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
             'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
         ]);
 
-        $startHour = (int) $request->input('start_hour');
-        $endHour = (int) $request->input('end_hour');
+        // Note: start_hour and end_hour are now expected to be strings like "06:00", "06:30"
+        $startTimeStr = $request->input('start_hour');
+        $endTimeStr = $request->input('end_hour');
         $paymentMethod = $request->input('payment_method');
 
-        if ($endHour <= $startHour) {
+        $startMinutes = $this->timeToMinutes($startTimeStr);
+        $endMinutes = $this->timeToMinutes($endTimeStr);
+        
+        if ($endMinutes <= $startMinutes) {
             return back()
                 ->withInput()
-                ->with('error', 'Giờ kết thúc phải lớn hơn giờ bắt đầu (tối thiểu 1 tiếng).');
+                ->with('error', 'Giờ kết thúc phải lớn hơn giờ bắt đầu.');
+        }
+
+        $durationMinutes = $endMinutes - $startMinutes;
+
+        if ($durationMinutes < 60) {
+            return back()
+                ->withInput()
+                ->with('error', 'Thời gian đặt sân tối thiểu là 1 tiếng (60 phút).');
         }
 
         $orderedSlots = $this->getStandardOrderedSlots();
 
         $selectedSlots = $orderedSlots
-            ->filter(function (TimeSlot $slot) use ($startHour, $endHour) {
-                $slotStartHour = (int) substr($slot->start_time, 0, 2);
-
-                return $slotStartHour >= $startHour && $slotStartHour < $endHour;
+            ->filter(function (TimeSlot $slot) use ($startTimeStr, $endTimeStr) {
+                $slotStart = substr($slot->start_time, 0, 5);
+                $slotEnd = $slot->end_time === '00:00:00' ? '24:00' : substr($slot->end_time, 0, 5);
+                
+                return $slotStart >= $startTimeStr && ($slotEnd <= $endTimeStr || ($endTimeStr === '24:00' && $slotEnd === '24:00'));
             })
             ->values();
 
-        $expectedSlotCount = $endHour - $startHour;
+        // Each slot is 30 mins, so expected slots is duration / 30
+        $expectedSlotCount = $durationMinutes / 30;
 
         if ($selectedSlots->count() !== $expectedSlotCount) {
             return back()
                 ->withInput()
                 ->with('error', 'Khoảng giờ đã chọn chưa khả dụng hoặc bị thiếu khung giờ liên tiếp.');
-        }
-
-        $isContiguous = true;
-        for ($i = 0; $i < $selectedSlots->count() - 1; $i++) {
-            if ($selectedSlots[$i]->end_time !== $selectedSlots[$i + 1]->start_time) {
-                $isContiguous = false;
-                break;
-            }
-        }
-
-        if (!$isContiguous) {
-            return back()
-                ->withInput()
-                ->with('error', 'Hệ thống chưa có đủ khung giờ liên tiếp. Vui lòng chọn mốc thời gian khác.');
         }
 
         $slotIds = $selectedSlots->pluck('id')->all();
@@ -112,34 +132,47 @@ class BookingController extends Controller
         }
 
         $arena = Arena::findOrFail((int) $request->arena_id);
+        
+        // Calculate total price based on duration (Rate per Hour)
+        $totalPrice = ($durationMinutes / 60) * $arena->price;
+
+        // Apply promotion: 10% discount for bookings >= 3 hours (180 mins)
+        if ($durationMinutes >= 180) {
+            $totalPrice = $totalPrice * 0.9;
+        }
+        
         $createdBookingIds = [];
 
-        DB::transaction(function () use ($request, $slotIds, $arena, $paymentMethod, &$createdBookingIds) {
-            foreach ($slotIds as $slotId) {
+        DB::transaction(function () use ($request, $selectedSlots, $arena, $paymentMethod, $totalPrice, &$createdBookingIds) {
+            $slotCount = $selectedSlots->count();
+            $amountPerSlot = floor($totalPrice / $slotCount);
+            $remainder = $totalPrice - ($amountPerSlot * $slotCount);
+
+            foreach ($selectedSlots as $index => $slot) {
                 $booking = Booking::create([
                     'user_id' => Auth::id(),
                     'arena_id' => $request->arena_id,
                     'date' => $request->date,
-                    'time_slot_id' => $slotId,
+                    'time_slot_id' => $slot->id,
                     'status' => 'pending',
                 ]);
 
                 $createdBookingIds[] = $booking->id;
 
+                // Add remainder to the last slot's payment to ensure total matches exactly
+                $currentAmount = ($index === $slotCount - 1) ? ($amountPerSlot + $remainder) : $amountPerSlot;
+
                 Payment::create([
                     'booking_id' => $booking->id,
-                    'amount' => $arena->price,
+                    'amount' => $currentAmount,
                     'method' => $paymentMethod,
                     'status' => $paymentMethod === 'bank_transfer' ? 'unpaid' : 'pending',
                 ]);
             }
         });
 
-        $startClock = sprintf('%02d:00', $startHour);
-        $endClock = sprintf('%02d:00', $endHour);
-
-        $bookingIdsParam = implode(',', $createdBookingIds);
-        $successMessage = 'Đã tạo lịch đặt từ ' . $startClock . ' đến ' . $endClock . ' thành công.';
+        $bookingIdsParam = implode('-', $createdBookingIds);
+        $successMessage = 'Đã tạo lịch đặt từ ' . $startTimeStr . ' đến ' . $endTimeStr . ' thành công.';
 
         if ($paymentMethod === 'bank_transfer') {
             return redirect()
@@ -207,19 +240,30 @@ class BookingController extends Controller
     }
 
     /**
-     * Ensure standard one-hour slots from 06:00 to 24:00 are available.
+     * Ensure standard 30-minute slots from 06:00 to 24:00 are available.
      */
     private function ensureStandardTimeSlots(): void
     {
         for ($hour = 6; $hour < 24; $hour++) {
-            $startTime = sprintf('%02d:00:00', $hour);
-            $endTime = $hour === 23 ? '00:00:00' : sprintf('%02d:00:00', $hour + 1);
+            for ($min = 0; $min < 60; $min += 30) {
+                $startTime = sprintf('%02d:%02d:00', $hour, $min);
+                $endHour = ($min + 30 >= 60) ? $hour + 1 : $hour;
+                $endMin = ($min + 30 >= 60) ? 0 : $min + 30;
+                
+                $endTime = $endHour === 24 ? '00:00:00' : sprintf('%02d:%02d:00', $endHour, $endMin);
 
-            TimeSlot::firstOrCreate([
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-            ]);
+                TimeSlot::firstOrCreate([
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                ]);
+            }
         }
+    }
+
+    private function timeToMinutes($timeStr) {
+        if ($timeStr === '24:00') return 24 * 60;
+        $parts = explode(':', $timeStr);
+        return (int)$parts[0] * 60 + (int)$parts[1];
     }
 
     /**
@@ -227,7 +271,11 @@ class BookingController extends Controller
      */
     private function getUserBookingsFromQuery(Request $request): Collection
     {
-        $ids = collect(explode(',', (string) $request->query('bookings', '')))
+        // Support both comma and hyphen as separators
+        $queryString = (string) $request->query('bookings', '');
+        $separator = str_contains($queryString, '-') ? '-' : ',';
+        
+        $ids = collect(explode($separator, $queryString))
             ->map(fn ($id) => (int) trim($id))
             ->filter(fn ($id) => $id > 0)
             ->unique()
@@ -252,26 +300,28 @@ class BookingController extends Controller
     }
 
     /**
-     * Get ordered standardized slots (06:00-24:00, 1 hour each).
+     * Get ordered standardized slots (06:00-24:00, 30 minutes each).
      */
     private function getStandardOrderedSlots(): Collection
     {
         $this->ensureStandardTimeSlots();
 
-        $expectedEndByStart = collect(range(6, 23))
-            ->mapWithKeys(function ($hour) {
-                $startTime = sprintf('%02d:00:00', $hour);
-                $endTime = $hour === 23 ? '00:00:00' : sprintf('%02d:00:00', $hour + 1);
+        $slots = [];
+        for ($hour = 6; $hour < 24; $hour++) {
+            for ($min = 0; $min < 60; $min += 30) {
+                $startTime = sprintf('%02d:%02d:00', $hour, $min);
+                $endHour = ($min + 30 >= 60) ? $hour + 1 : $hour;
+                $endMin = ($min + 30 >= 60) ? 0 : $min + 30;
+                $endTime = $endHour === 24 ? '00:00:00' : sprintf('%02d:%02d:00', $endHour, $endMin);
+                $slots[$startTime] = $endTime;
+            }
+        }
 
-                return [$startTime => $endTime];
-            });
-
-        return TimeSlot::whereIn('start_time', $expectedEndByStart->keys()->all())
+        return TimeSlot::whereIn('start_time', array_keys($slots))
             ->orderBy('start_time')
             ->get()
-            ->filter(function (TimeSlot $slot) use ($expectedEndByStart) {
-                return isset($expectedEndByStart[$slot->start_time])
-                    && $slot->end_time === $expectedEndByStart[$slot->start_time];
+            ->filter(function (TimeSlot $slot) use ($slots) {
+                return isset($slots[$slot->start_time]) && $slot->end_time === $slots[$slot->start_time];
             })
             ->unique('start_time')
             ->values();
@@ -288,5 +338,27 @@ class BookingController extends Controller
             ->get();
             
         return view('bookings.my-bookings', compact('bookings'));
+    }
+
+    /**
+     * Cancel a pending booking.
+     */
+    public function cancel(Booking $booking)
+    {
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($booking->status !== 'pending') {
+            return back()->with('error', 'Chỉ có thể hủy yêu cầu đang chờ xác nhận.');
+        }
+
+        $booking->update(['status' => 'cancelled']);
+        
+        if ($booking->payment) {
+            $booking->payment->update(['status' => 'failed']);
+        }
+
+        return back()->with('success', 'Đã hủy yêu cầu đặt sân.');
     }
 }
