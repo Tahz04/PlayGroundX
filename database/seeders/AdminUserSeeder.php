@@ -17,11 +17,15 @@ class AdminUserSeeder extends Seeder
     {
         $adminRole = Role::where('name', 'admin')->first();
         
-        User::create([
-            'name' => 'System Admin',
-            'email' => 'admin@playgroundx.vn',
-            'password' => Hash::make('admin123'),
-            'role_id' => $adminRole->id,
-        ]);
+        // Create admin user if not exists
+        User::firstOrCreate(
+            ['email' => 'admin@playgroundx.com'],
+            [
+                'name' => 'System Admin',
+                'password' => Hash::make('12345678'),
+                'role_id' => $adminRole->id,
+                'status' => 'active',
+            ]
+        );
     }
 }
