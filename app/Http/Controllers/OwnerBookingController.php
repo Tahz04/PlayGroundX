@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Arena;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class OwnerBookingController extends Controller
 {
+    /**
+     * Hiển thị danh sách đơn đặt sân của owner
+     */
     public function index()
     {
         $arenaIds = Auth::user()->arenas()->pluck('id');
@@ -21,6 +25,39 @@ class OwnerBookingController extends Controller
         return view('owner.bookings.index', compact('bookings'));
     }
 
+    /**
+     * Cập nhật trạng thái đơn đặt sân (dùng chung cho confirm/cancel)
+     */
+    public function updateStatus(Request $request, Booking $booking)
+    {
+        // Kiểm tra booking thuộc sân của owner
+        $arenaIds = Auth::user()->arenas()->pluck('id');
+        if (!$arenaIds->contains($booking->arena_id)) {
+            abort(403, 'Bạn không có quyền thao tác trên đơn đặt này');
+        }
+
+        $request->validate([
+            'status' => 'required|in:pending,confirmed,cancelled'
+        ]);
+
+        $booking->update(['status' => $request->status]);
+
+        // Cập nhật trạng thái thanh toán tương ứng
+        if ($booking->payment) {
+            $paymentStatus = $request->status === 'confirmed' ? 'paid' : 'pending';
+            if ($request->status === 'cancelled') {
+                $paymentStatus = 'failed';
+            }
+            $booking->payment->update(['status' => $paymentStatus]);
+        }
+
+        $statusText = $request->status === 'confirmed' ? 'xác nhận' : ($request->status === 'cancelled' ? 'hủy' : 'cập nhật');
+        return back()->with('success', "Đã {$statusText} đơn đặt sân thành công!");
+    }
+
+    /**
+     * Xác nhận đơn đặt sân
+     */
     public function confirm(Booking $booking)
     {
         $this->authorizeOwner($booking->arena);
@@ -34,6 +71,9 @@ class OwnerBookingController extends Controller
         return back()->with('success', 'Đã xác nhận đơn đặt sân thành công!');
     }
 
+    /**
+     * Hủy đơn đặt sân
+     */
     public function cancel(Booking $booking)
     {
         $this->authorizeOwner($booking->arena);
@@ -47,10 +87,13 @@ class OwnerBookingController extends Controller
         return back()->with('success', 'Đã hủy đơn đặt sân.');
     }
 
+    /**
+     * Private method kiểm tra quyền owner
+     */
     private function authorizeOwner($arena)
     {
         if ($arena->user_id !== Auth::id()) {
-            abort(403);
+            abort(403, 'Bạn không có quyền thao tác trên sân này');
         }
     }
 }

@@ -61,6 +61,8 @@
                                                 <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Tiền mặt</span>
                                             @endif
                                         </div>
+                                    @else
+                                        <span class="text-muted small">Chưa thanh toán</span>
                                     @endif
                                 </td>
                                 <td>
@@ -75,7 +77,7 @@
                                         $statusText = match($booking->status) {
                                             'pending' => 'Chờ xác nhận',
                                             'confirmed' => 'Đã xác nhận',
-                                            'paid' => 'Đã toán',
+                                            'paid' => 'Đã thanh toán',
                                             'cancelled' => 'Đã hủy',
                                             default => $booking->status
                                         };
@@ -85,22 +87,39 @@
                                 <td class="text-end pe-4">
                                     <div class="d-flex justify-content-end gap-2">
                                         @if($booking->status === 'pending')
-                                            <form action="{{ route('owner.bookings.confirm', $booking) }}" method="POST">
+                                            {{-- Nút xác nhận --}}
+                                            <form action="{{ route('owner.bookings.confirm', $booking) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
+                                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" onclick="return confirm('Xác nhận đơn đặt sân này?')">
                                                     <i class="fas fa-check me-1"></i> Xác nhận
                                                 </button>
                                             </form>
-                                            <form action="{{ route('owner.bookings.cancel', $booking) }}" method="POST">
+                                            
+                                            {{-- Nút hủy --}}
+                                            <form action="{{ route('owner.bookings.cancel', $booking) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Hủy đơn đặt sân này?')">
                                                     <i class="fas fa-times me-1"></i> Hủy
                                                 </button>
                                             </form>
+                                        @elseif($booking->status === 'confirmed')
+                                            {{-- Dropdown cập nhật trạng thái (giữ từ code thứ 2) --}}
+                                            <form action="{{ route('owner.bookings.update-status', $booking) }}" method="POST" class="d-flex gap-2">
+                                                @csrf
+                                                @method('PATCH')
+                                                <select name="status" class="form-select form-select-sm rounded-pill w-auto" style="font-size: 0.8rem;">
+                                                    <option value="pending" {{ $booking->status=='pending' ? 'selected' : '' }}>Chờ xử lý</option>
+                                                    <option value="confirmed" {{ $booking->status=='confirmed' ? 'selected' : '' }}>Xác nhận</option>
+                                                    <option value="cancelled" {{ $booking->status=='cancelled' ? 'selected' : '' }}>Hủy</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">
+                                                    <i class="fas fa-save me-1"></i> Lưu
+                                                </button>
+                                            </form>
                                         @else
-                                            <span class="text-muted small italic">Không có hành động</span>
+                                            <span class="text-muted small fst-italic">Không có hành động</span>
                                         @endif
                                     </div>
                                 </td>
@@ -129,7 +148,7 @@
     .avatar-placeholder {
         width: 40px;
         height: 40px;
-        background: var(--clr-primary-500);
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
         color: white;
         display: flex;
         align-items: center;
@@ -144,6 +163,9 @@
         font-weight: 700;
         color: #6c757d;
         border-bottom-width: 1px;
+    }
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
     }
 </style>
 @endsection

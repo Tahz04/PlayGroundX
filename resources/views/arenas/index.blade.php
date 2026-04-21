@@ -46,7 +46,13 @@
                 <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="{{ ($loop->index % 4) * 100 }}">
                     <div class="pitch-card bg-white shadow-sm h-100">
                         <div class="pitch-image">
-                            <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=250&fit=crop" alt="{{ $arena->name }}">
+                            @if($arena->image)
+    <img src="{{ asset('storage/' . $arena->image) }}" alt="{{ $arena->name }}" style="width: 100%; height: 200px; object-fit: cover;">
+@else
+    <div style="width: 100%; height: 200px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-image fa-3x text-muted"></i>
+    </div>
+@endif
                             <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
                             <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
                             <div class="pitch-overlay"></div>

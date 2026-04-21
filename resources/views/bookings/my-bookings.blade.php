@@ -31,7 +31,13 @@
                 <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden">
                     <div class="row g-0">
                         <div class="col-4">
-                            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&fit=crop" class="img-fluid h-100 object-fit-cover" alt="Pitch">
+                            @if($booking->arena->image)
+    <img src="{{ asset('storage/' . $booking->arena->image) }}" class="img-fluid h-100 object-fit-cover" alt="{{ $booking->arena->name }}">
+@else
+    <div class="bg-secondary d-flex align-items-center justify-content-center h-100" style="min-height: 150px;">
+        <i class="fas fa-image fa-2x text-white opacity-50"></i>
+    </div>
+@endif
                         </div>
                         <div class="col-8">
                             <div class="card-body p-4">

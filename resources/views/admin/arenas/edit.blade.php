@@ -15,7 +15,8 @@
 
             <div class="card border-0 shadow-sm" style="border-radius: 20px;">
                 <div class="card-body p-4 p-md-5">
-                    <form action="{{ route('admin.arenas.update', $arena) }}" method="POST">
+                    {{-- ⚠️ THÊM enctype="multipart/form-data" --}}
+                    <form action="{{ route('admin.arenas.update', $arena) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="row g-4">
@@ -48,6 +49,24 @@
                                     <span class="input-group-text">đ</span>
                                 </div>
                                 @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            {{-- 🖼️ HIỂN THỊ ẢNH HIỆN TẠI --}}
+                            @if($arena->image)
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Ảnh Hiện Tại</label>
+                                <div class="mt-2">
+                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" class="rounded shadow-sm" style="width: 200px; height: 150px; object-fit: cover;">
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH MỚI --}}
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Đổi Ảnh Sân</label>
+                                <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                <small class="text-muted">Để trống nếu không muốn đổi ảnh. Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
+                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="col-12">

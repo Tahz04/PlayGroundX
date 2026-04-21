@@ -15,6 +15,7 @@ class Arena extends Model
         'latitude',
         'longitude',
         'status',
+        'image',
     ];
 
     public function owner()

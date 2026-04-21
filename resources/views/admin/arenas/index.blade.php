@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Quản Lý Sân Cầu Lông - Admin')
+@section('title', 'Quản Lý Sân Bóng Đá - Admin')
 
 @section('content')
 <div class="container" style="margin-top: 100px; margin-bottom: 50px;">
@@ -26,7 +26,8 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Tên Sân</th>
+                        <th class="ps-4">Ảnh</th>
+                        <th>Tên Sân</th>
                         <th>Địa Chỉ</th>
                         <th>Giá/Giờ</th>
                         <th>Tọa Độ (Lat, Lng)</th>
@@ -36,13 +37,22 @@
                 <tbody>
                     @forelse($arenas as $arena)
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-4" style="width: 80px;">
+                                @if($arena->image)
+                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" style="width: 60px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                @else
+                                    <div style="width: 60px; height: 50px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="fw-bold">{{ $arena->name }}</span>
                                 <div class="small text-primary fw-semibold">{{ $arena->type }}</div>
                             </td>
                             <td>
                                 <i class="fas fa-map-marker-alt text-danger me-1 small"></i>
-                                <span class="text-muted">{{ $arena->location }}</span>
+                                <span class="text-muted">{{ Str::limit($arena->location, 50) }}</span>
                             </td>
                             <td>
                                 <span class="badge bg-soft-primary text-primary fw-bold" style="font-size: 0.9rem;">
@@ -69,7 +79,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-info-circle mb-2 fa-2x"></i>
                                     <p>Chưa có sân nào được thêm.</p>
@@ -98,8 +108,8 @@
         border-bottom: 2px solid #f1f5f9;
     }
     .table tbody td {
-        padding-top: 1.25rem;
-        padding-bottom: 1.25rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
         border-bottom: 1px solid #f1f5f9;
     }
     .table-hover tbody tr:hover {

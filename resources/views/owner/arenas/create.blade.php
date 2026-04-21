@@ -17,7 +17,8 @@
             <div class="col-lg-8">
                 <div class="card border-0 rounded-4 shadow-sm bg-white">
                     <div class="card-body p-5">
-                        <form action="{{ route('owner.arenas.store') }}" method="POST">
+                        {{-- ⚠️ QUAN TRỌNG: Thêm enctype="multipart/form-data" --}}
+                        <form action="{{ route('owner.arenas.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div class="mb-4">
@@ -58,17 +59,27 @@
                                 @enderror
                             </div>
 
+                            {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH --}}
+                            <div class="mb-4">
+                                <label for="image" class="form-label fw-bold">Ảnh Sân</label>
+                                <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                <small class="text-muted">Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
+                                @error('image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
                                     <label for="latitude" class="form-label fw-bold">Vĩ độ <span class="text-danger">*</span></label>
-                                    <input type="number" name="latitude" id="latitude" class="form-control @error('latitude') is-invalid @enderror" placeholder="10.7769" value="{{ old('latitude') }}" step="0.0001">
+                                    <input type="number" name="latitude" id="latitude" class="form-control" step="0.0000001" value="{{ old('latitude') }}">
                                     @error('latitude')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label for="longitude" class="form-label fw-bold">Kinh độ <span class="text-danger">*</span></label>
-                                    <input type="number" name="longitude" id="longitude" class="form-control @error('longitude') is-invalid @enderror" placeholder="106.7009" value="{{ old('longitude') }}" step="0.0001">
+                                    <input type="number" name="longitude" id="longitude" class="form-control" step="0.0000001" value="{{ old('longitude') }}">
                                     @error('longitude')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -76,10 +87,10 @@
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-hero-primary btn-lg">
+                                <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fas fa-check me-2"></i> Thêm Sân
                                 </button>
-                                <a href="{{ route('owner.dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{{ route('owner.arenas.index') }}" class="btn btn-outline-secondary btn-lg">
                                     <i class="fas fa-arrow-left me-2"></i> Quay Lại
                                 </a>
                             </div>

@@ -218,155 +218,131 @@
         </div>
     </section>
 
+<!-- ==================== PITCHES ==================== -->
+<section class="pitches-section" id="san-bong">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-badge">
+                <i class="fas fa-futbol"></i>
+                <span>Sân bóng nổi bật</span>
+            </div>
+            <h2 class="section-title">Sân Bóng <span class="accent">Hàng Đầu</span></h2>
+            <p class="section-desc">Những sân bóng chất lượng cao, được đánh giá tốt nhất bởi cộng đồng người chơi</p>
+        </div>
+
+        <div class="row g-4">
+            @forelse($arenas as $arena)
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                    <div class="pitch-card">
+                        <div class="pitch-image">
+                            @if($arena->image)
+                                <img src="{{ asset('storage/' . $arena->image) }}" alt="{{ $arena->name }}" style="width: 100%; height: 200px; object-fit: cover;">
+                            @else
+                                <div style="width: 100%; height: 200px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            @endif
+                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
+                            <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
+                            <div class="pitch-overlay"></div>
+                        </div>
+                        <div class="pitch-info">
+                            <h3 class="pitch-name">{{ $arena->name }}</h3>
+                            <div class="pitch-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ Str::limit($arena->location, 50) }}</span>
+                            </div>
+                            <div class="pitch-meta">
+                                <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
+                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
+                            </div>
+                            <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
+                                <i class="fas fa-calendar-check"></i>
+                                Đặt Sân Ngay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Đang cập nhật danh sách sân...</p>
+                </div>
+            @endforelse
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{{ route('arenas.index') }}" class="btn-hero-secondary" style="color: var(--clr-dark-900); border-color: var(--clr-dark-300);">
+                <i class="fas fa-th-large"></i>
+                Xem Tất Cả Sân Bóng
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
     <!-- ==================== PITCHES ==================== -->
-    <section class="pitches-section" id="san-bong">
-        <div class="container">
-            <div class="section-header" data-aos="fade-up">
-                <div class="section-badge">
-                    <i class="fas fa-futbol"></i>
-                    <span>Sân bóng nổi bật</span>
-                </div>
-                <h2 class="section-title">Sân Bóng <span class="accent">Hàng Đầu</span></h2>
-                <p class="section-desc">Những sân bóng chất lượng cao, được đánh giá tốt nhất bởi cộng đồng người chơi</p>
+<section class="pitches-section" id="san-bong">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-badge">
+                <i class="fas fa-futbol"></i>
+                <span>Sân bóng nổi bật</span>
             </div>
-
-            <div class="row g-4">
-                @forelse($arenas as $arena)
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                        <div class="pitch-card">
-                            <div class="pitch-image">
-                                <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&h=400&fit=crop" alt="{{ $arena->name }}">
-                                <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
-                                <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
-                                <div class="pitch-overlay"></div>
-                            </div>
-                            <div class="pitch-info">
-                                <h3 class="pitch-name">{{ $arena->name }}</h3>
-                                <div class="pitch-location">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>{{ $arena->location }}</span>
-                                </div>
-                                <div class="pitch-meta">
-                                    <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
-                                    <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
-                                </div>
-                                <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
-                                    <i class="fas fa-calendar-check"></i>
-                                    Đặt Sân Ngay
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-12 text-center py-5">
-                        <p class="text-muted">Đang cập nhật danh sách sân...</p>
-                    </div>
-                @endforelse
-            </div>
-
-            <div class="text-center mt-5" data-aos="fade-up">
-                <a href="{{ route('arenas.index') }}" class="btn-hero-secondary" style="color: var(--clr-dark-900); border-color: var(--clr-dark-300);">
-                    <i class="fas fa-th-large"></i>
-                    Xem Tất Cả Sân Bóng
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
+            <h2 class="section-title">Sân Bóng <span class="accent">Hàng Đầu</span></h2>
+            <p class="section-desc">Những sân bóng chất lượng cao, được đánh giá tốt nhất bởi cộng đồng người chơi</p>
         </div>
-    </section>
 
-    <!-- ==================== PRICING ==================== -->
-    <section class="pricing-section" id="bang-gia">
-        <div class="container">
-            <div class="section-header" data-aos="fade-up">
-                <div class="section-badge">
-                    <i class="fas fa-tags"></i>
-                    <span>Bảng giá minh bạch</span>
-                </div>
-                <h2 class="section-title">Bảng Giá <span class="accent">Thuê Sân</span></h2>
-                <p class="section-desc">Giá cả cạnh tranh, minh bạch, không phát sinh chi phí ẩn</p>
-            </div>
-
-            <div class="row g-4 justify-content-center">
-                <!-- Sân 5 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="0">
-                    <div class="pricing-card">
-                        <div class="pricing-icon">
-                            <i class="fas fa-futbol"></i>
+        <div class="row g-4">
+            @forelse($arenas as $arena)
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                    <div class="pitch-card">
+                        <div class="pitch-image">
+                            {{-- 🖼️ CHỈ HIỂN THỊ ẢNH ĐÃ UPLOAD --}}
+                            @if($arena->image)
+                                <img src="{{ asset('storage/' . $arena->image) }}" alt="{{ $arena->name }}" style="width: 100%; height: 200px; object-fit: cover;">
+                            @else
+                                {{-- KHÔNG HIỂN THỊ GÌ HOẶC HIỂN THỊ ICON MẶC ĐỊNH --}}
+                                <div style="width: 100%; height: 200px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            @endif
+                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
+                            <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
+                            <div class="pitch-overlay"></div>
                         </div>
-                        <h3 class="pricing-name">Sân 5 Người</h3>
-                        <p class="pricing-desc">Phù hợp nhóm nhỏ, giao lưu bạn bè</p>
-                        <div class="pricing-value">
-                            <span class="pricing-amount">200K</span>
-                            <span class="pricing-unit"> - 350K / 90 phút</span>
+                        <div class="pitch-info">
+                            <h3 class="pitch-name">{{ $arena->name }}</h3>
+                            <div class="pitch-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ Str::limit($arena->location, 50) }}</span>
+                            </div>
+                            <div class="pitch-meta">
+                                <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
+                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
+                            </div>
+                            <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
+                                <i class="fas fa-calendar-check"></i>
+                                Đặt Sân Ngay
+                            </a>
                         </div>
-                        <ul class="pricing-features">
-                            <li><i class="fas fa-check-circle"></i> Sân cỏ nhân tạo chất lượng cao</li>
-                            <li><i class="fas fa-check-circle"></i> Hệ thống chiếu sáng LED</li>
-                            <li><i class="fas fa-check-circle"></i> Phòng thay đồ sạch sẽ</li>
-                            <li><i class="fas fa-check-circle"></i> Bãi đỗ xe miễn phí</li>
-                            <li><i class="fas fa-check-circle"></i> Nước uống miễn phí</li>
-                        </ul>
-                        <button class="btn-pricing">
-                            <i class="fas fa-calendar-check me-2"></i>Đặt Sân Ngay
-                        </button>
                     </div>
                 </div>
-
-                <!-- Sân 7 (Featured) -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="pricing-card featured">
-                        <div class="pricing-label-popular">
-                            <i class="fas fa-fire me-1"></i> Phổ biến nhất
-                        </div>
-                        <div class="pricing-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <h3 class="pricing-name">Sân 7 Người</h3>
-                        <p class="pricing-desc">Lựa chọn phổ biến nhất hiện nay</p>
-                        <div class="pricing-value">
-                            <span class="pricing-amount">300K</span>
-                            <span class="pricing-unit"> - 500K / 90 phút</span>
-                        </div>
-                        <ul class="pricing-features">
-                            <li><i class="fas fa-check-circle"></i> Tất cả tiện ích của Sân 5</li>
-                            <li><i class="fas fa-check-circle"></i> Sân rộng tiêu chuẩn FIFA</li>
-                            <li><i class="fas fa-check-circle"></i> Camera quay trận đấu</li>
-                            <li><i class="fas fa-check-circle"></i> Trọng tài chuyên nghiệp</li>
-                            <li><i class="fas fa-check-circle"></i> Giảm 10% cho khách thường xuyên</li>
-                        </ul>
-                        <button class="btn-pricing primary">
-                            <i class="fas fa-calendar-check me-2"></i>Đặt Sân Ngay
-                        </button>
-                    </div>
+            @empty
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Đang cập nhật danh sách sân...</p>
                 </div>
-
-                <!-- Sân 11 -->
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="pricing-card">
-                        <div class="pricing-icon">
-                            <i class="fas fa-crown"></i>
-                        </div>
-                        <h3 class="pricing-name">Sân 11 Người</h3>
-                        <p class="pricing-desc">Tiêu chuẩn thi đấu chuyên nghiệp</p>
-                        <div class="pricing-value">
-                            <span class="pricing-amount">500K</span>
-                            <span class="pricing-unit"> - 1.200K / 90 phút</span>
-                        </div>
-                        <ul class="pricing-features">
-                            <li><i class="fas fa-check-circle"></i> Tất cả tiện ích của Sân 7</li>
-                            <li><i class="fas fa-check-circle"></i> Sân cỏ tự nhiên / hybrid</li>
-                            <li><i class="fas fa-check-circle"></i> Khán đài có mái che</li>
-                            <li><i class="fas fa-check-circle"></i> MC & hệ thống âm thanh</li>
-                            <li><i class="fas fa-check-circle"></i> Tổ chức giải đấu trọn gói</li>
-                        </ul>
-                        <button class="btn-pricing">
-                            <i class="fas fa-calendar-check me-2"></i>Đặt Sân Ngay
-                        </button>
-                    </div>
-                </div>
-            </div>
+            @endforelse
         </div>
-    </section>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{{ route('arenas.index') }}" class="btn-hero-secondary" style="color: var(--clr-dark-900); border-color: var(--clr-dark-300);">
+                <i class="fas fa-th-large"></i>
+                Xem Tất Cả Sân Bóng
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
 
     <!-- ==================== TESTIMONIALS ==================== -->
     <section class="testimonials-section">

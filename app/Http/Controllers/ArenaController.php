@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Arena;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ArenaController extends Controller
 {
@@ -55,16 +56,24 @@ class ArenaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:Sân 5,Sân 7,Sân 11',
             'location' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Arena::create($request->all());
+        // Xử lý upload ảnh
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
+            $validated['image'] = $file->storeAs('arenas', $filename, 'public');
+        }
+
+        Arena::create($validated);
 
         return redirect()->route('admin.arenas.index')->with('success', 'Đã thêm sân mới thành công!');
     }
@@ -82,16 +91,29 @@ class ArenaController extends Controller
      */
     public function update(Request $request, Arena $arena)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:Sân 5,Sân 7,Sân 11',
             'location' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $arena->update($request->all());
+        // Xử lý upload ảnh mới
+        if ($request->hasFile('image')) {
+            // Xóa ảnh cũ nếu có
+            if ($arena->image && Storage::disk('public')->exists($arena->image)) {
+                Storage::disk('public')->delete($arena->image);
+            }
+            
+            $file = $request->file('image');
+            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
+            $validated['image'] = $file->storeAs('arenas', $filename, 'public');
+        }
+
+        $arena->update($validated);
 
         return redirect()->route('admin.arenas.index')->with('success', 'Đã cập nhật thông tin sân thành công!');
     }
@@ -101,6 +123,11 @@ class ArenaController extends Controller
      */
     public function destroy(Arena $arena)
     {
+        // Xóa ảnh khi xóa sân
+        if ($arena->image && Storage::disk('public')->exists($arena->image)) {
+            Storage::disk('public')->delete($arena->image);
+        }
+        
         $arena->delete();
         return redirect()->route('admin.arenas.index')->with('success', 'Đã xóa sân thành công!');
     }

@@ -9,12 +9,16 @@
             <div class="card border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
                 <div class="row g-0">
                     <!-- Left: Info -->
-                    <div class="col-lg-5 bg-dark text-white p-5 d-flex flex-column justify-content-center" style="background: linear-gradient(rgba(15,23,42,0.9), rgba(15,23,42,0.9)), url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600&fit=crop') center/cover;">
-                        <div class="mb-4">
-                            <span class="badge bg-primary mb-2">{{ $arena->type }}</span>
-                            <h2 class="fw-bold display-6 mb-3">{{ $arena->name }}</h2>
-                            <p class="text-white-50"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $arena->location }}</p>
-                        </div>
+                    @php
+                    $bgImage = $arena->image ? asset('storage/' . $arena->image) : null;
+                    @endphp
+                    <div class="col-lg-5 text-white p-5 d-flex flex-column justify-content-center" 
+                    style="@if($bgImage) background: linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.85)), url('{{ $bgImage }}') center/cover; background-size: cover; @else background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%); @endif">
+                    <div class="mb-4">
+                        <span class="badge bg-primary mb-2">{{ $arena->type }}</span>
+                        <h2 class="fw-bold display-6 mb-3">{{ $arena->name }}</h2>
+                        <p class="text-white-50"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $arena->location }}</p>
+                    </div>
                         <div class="pricing-info mb-5">
                             <h3 class="fw-bold text-primary" id="base-price-display">
                                 {{ number_format($arena->price) }}đ 

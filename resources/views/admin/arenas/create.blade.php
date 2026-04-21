@@ -15,7 +15,8 @@
 
             <div class="card border-0 shadow-sm" style="border-radius: 20px;">
                 <div class="card-body p-4 p-md-5">
-                    <form action="{{ route('admin.arenas.store') }}" method="POST">
+                    {{-- ⚠️ THÊM enctype="multipart/form-data" --}}
+                    <form action="{{ route('admin.arenas.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row g-4">
                             <div class="col-md-8">
@@ -47,6 +48,14 @@
                                     <span class="input-group-text">đ</span>
                                 </div>
                                 @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH --}}
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Ảnh Sân</label>
+                                <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                <small class="text-muted">Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
+                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="col-12">

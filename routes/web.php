@@ -6,6 +6,7 @@ use App\Http\Controllers\MapController;
 use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\OwnerRequestController;
+use App\Http\Controllers\OwnerBookingController;
 use Illuminate\Support\Facades\Route;
 
 // Trang chủ
@@ -60,8 +61,8 @@ Route::middleware('auth')->group(function () {
             Route::resource('arenas', \App\Http\Controllers\ArenaController::class);
             
             // Quản lý đơn đặt sân
-            Route::get('/bookings', [\App\Http\Controllers\AdminBookingController::class, 'index'])->name('bookings.index');
-            Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
+            Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('bookings.index');
+            Route::patch('/bookings/{booking}/status', [OwnerBookingController::class, 'updateStatus'])->name('bookings.update-status');
 
             // Quản lý yêu cầu trở thành chủ sân
             Route::get('/owner-requests', [AdminController::class, 'index'])->name('owner-requests.index');

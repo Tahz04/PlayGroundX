@@ -17,7 +17,8 @@
             <div class="col-lg-8">
                 <div class="card border-0 rounded-4 shadow-sm bg-white">
                     <div class="card-body p-5">
-                        <form action="{{ route('owner.arenas.update', $arena) }}" method="POST">
+                        {{-- ⚠️ THÊM enctype="multipart/form-data" --}}
+                        <form action="{{ route('owner.arenas.update', $arena) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -55,6 +56,26 @@
                                 <label for="location" class="form-label fw-bold">Địa Điểm <span class="text-danger">*</span></label>
                                 <input type="text" name="location" id="location" class="form-control @error('location') is-invalid @enderror" placeholder="VD: 123 Đường ABC, Quận 1, TP HCM" value="{{ old('location', $arena->location) }}">
                                 @error('location')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            {{-- 🖼️ THÊM PHẦN HIỂN THỊ ẢNH HIỆN TẠI --}}
+                            @if($arena->image)
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Ảnh Hiện Tại</label>
+                                <div class="mt-2">
+                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" class="rounded shadow-sm" style="width: 200px; height: 150px; object-fit: cover;">
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH MỚI --}}
+                            <div class="mb-4">
+                                <label for="image" class="form-label fw-bold">Đổi Ảnh Sân</label>
+                                <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                <small class="text-muted">Để trống nếu không muốn đổi ảnh. Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
+                                @error('image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

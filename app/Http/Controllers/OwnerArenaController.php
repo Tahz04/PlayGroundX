@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Arena;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property-read \Illuminate\Filesystem\FilesystemManager $storage
+ */
 class OwnerArenaController extends Controller
 {
     /**
@@ -39,7 +44,12 @@ class OwnerArenaController extends Controller
             'price' => 'required|numeric|min:0',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'image' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('arenas', 'public');
+        }
 
         Auth::user()->arenas()->create($validated);
 
@@ -59,23 +69,42 @@ class OwnerArenaController extends Controller
      * Update the specified arena in storage.
      */
     public function update(Request $request, Arena $arena)
-    {
-        $this->authorizeOwner($arena);
+{
+    $this->authorizeOwner($arena);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|in:Sân 5,Sân 7,Sân 11',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'type' => 'required|string|in:Sân 5,Sân 7,Sân 11',
+        'location' => 'required|string|max:255',
+        'price' => 'required|numeric|min:0',
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+        'image' => 'nullable|image|max:2048',
+    ]);
 
-        $arena->update($validated);
-
-        return redirect()->route('owner.arenas.index')->with('success', 'Cập nhật sân thành công!');
+    // Xử lý ảnh
+    if ($request->hasFile('image')) {
+        // Xóa ảnh cũ
+        if ($arena->image && Storage::disk('public')->exists($arena->image)) {
+            Storage::disk('public')->delete($arena->image);
+        }
+        
+        // Lưu ảnh mới
+        $file = $request->file('image');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $imagePath = $file->storeAs('arenas', $filename, 'public');
+        $validated['image'] = $imagePath;
+        
+        Log::info('Image path to save: ' . $imagePath);
     }
 
+    // Cập nhật
+    $arena->update($validated);
+    
+    Log::info('After update - image in model: ' . $arena->fresh()->image);
+
+    return redirect()->route('owner.arenas.index')->with('success', 'Cập nhật sân thành công!');
+}
     /**
      * Remove the specified arena from storage.
      */
