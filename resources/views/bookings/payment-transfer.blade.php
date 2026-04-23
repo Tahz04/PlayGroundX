@@ -32,8 +32,8 @@
                             <div class="col-md-7">
                                 <div class="border rounded-3 p-4 h-100 bg-white">
                                     <h4 class="h6 fw-bold mb-3">Thông tin tài khoản</h4>
-                                    <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Ngân hàng:</span> <strong>Vietcombank</strong></div>
-                                    <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Số tài khoản:</span> <strong>0123456789</strong></div>
+                                    <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Ngân hàng:</span> <strong>BIDV</strong></div>
+                                    <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Số tài khoản:</span> <strong>2601647399</strong></div>
                                     <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Chủ tài khoản:</span> <strong>PLAYGROUNDX CO., LTD</strong></div>
                                     <div class="mt-3 p-3 bg-primary bg-opacity-10 rounded-3 text-center">
                                         <div class="text-primary small mb-1">Nội dung chuyển khoản</div>
@@ -46,7 +46,7 @@
                                     <h4 class="h6 fw-bold mb-3">Mã QR VietQR</h4>
                                     @php
                                         $qrContent = "PGX " . $firstBooking->user_id . " " . date('mdHi', strtotime($firstBooking->created_at));
-                                        $qrUrl = "https://img.vietqr.io/image/VCB-0123456789-compact2.png?amount={$totalAmount}&addInfo=" . urlencode($qrContent) . "&accountName=PLAYGROUNDX%20CO%20LTD";
+                                        $qrUrl = "https://img.vietqr.io/image/BIDV-2601647399-compact2.png?amount={$totalAmount}&addInfo=" . urlencode($qrContent) . "&accountName=PLAYGROUNDX%20CO%20LTD";
                                     @endphp
                                     <img src="{{ $qrUrl }}" alt="QR Code Thanh Toán" class="img-fluid rounded-3 mb-2" style="max-width: 200px;">
                                     <div class="small text-muted"><i class="fas fa-camera me-1"></i> Quét mã để tự động nhập thông tin</div>

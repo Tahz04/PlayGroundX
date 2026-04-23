@@ -208,6 +208,7 @@ class BookingController extends Controller
                 'date' => $request->date,
                 'start_time' => $startTimeStr . ':00',
                 'end_time' => $endTimeStr . ':00',
+                'time_slot_id' => null,
                 'status' => 'pending',
             ]);
 
