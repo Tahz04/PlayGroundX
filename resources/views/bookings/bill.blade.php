@@ -39,7 +39,32 @@
                             <div class="col-md-4">
                                 <div class="bg-light rounded-3 p-3 h-100">
                                     <div class="text-muted small">Thời lượng</div>
-                                    <div class="fw-semibold">{{ ($bookings->count() * 30) / 60 }} giờ</div>
+                                    <div class="fw-semibold">
+                                        @php
+                                            $durationHours = 0;
+                                            $hasNewFormat = isset($firstBooking->start_time, $lastBooking->end_time) && 
+                                                           !is_null($firstBooking->start_time) && 
+                                                           !is_null($lastBooking->end_time) && 
+                                                           $firstBooking->start_time !== '' && 
+                                                           $lastBooking->end_time !== '';
+                                            
+                                            if ($hasNewFormat) {
+                                                try {
+                                                    $startMinutes = (int) \Carbon\Carbon::createFromFormat('H:i:s', $firstBooking->start_time)->format('H') * 60 + 
+                                                                    (int) \Carbon\Carbon::createFromFormat('H:i:s', $firstBooking->start_time)->format('i');
+                                                    $endMinutes = (int) \Carbon\Carbon::createFromFormat('H:i:s', $lastBooking->end_time)->format('H') * 60 + 
+                                                                  (int) \Carbon\Carbon::createFromFormat('H:i:s', $lastBooking->end_time)->format('i');
+                                                    $durationHours = ($endMinutes - $startMinutes) / 60;
+                                                } catch (\Exception $e) {
+                                                    $durationHours = 0;
+                                                }
+                                            } else {
+                                                $durationHours = ($bookings->count() * 30) / 60;
+                                            }
+                                            echo number_format($durationHours, 1, ',', '');
+                                        @endphp
+                                        giờ
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -61,7 +86,29 @@
                                 <tbody>
                                     @foreach($bookings as $booking)
                                         <tr>
-                                            <td>{{ $booking->timeSlot->formattedTime() }}</td>
+                                            <td>
+                                                @php
+                                                    $timeDisplay = 'N/A';
+                                                    $hasNewFormat = isset($booking->start_time, $booking->end_time) && 
+                                                                   !is_null($booking->start_time) && 
+                                                                   !is_null($booking->end_time) && 
+                                                                   $booking->start_time !== '' && 
+                                                                   $booking->end_time !== '';
+                                                    
+                                                    if ($hasNewFormat) {
+                                                        try {
+                                                            $start = \Carbon\Carbon::createFromFormat('H:i:s', $booking->start_time)->format('H:i');
+                                                            $end = \Carbon\Carbon::createFromFormat('H:i:s', $booking->end_time)->format('H:i');
+                                                            $timeDisplay = $start . ' - ' . $end;
+                                                        } catch (\Exception $e) {
+                                                            $timeDisplay = 'Error';
+                                                        }
+                                                    } elseif ($booking->timeSlot) {
+                                                        $timeDisplay = $booking->timeSlot->formattedTime();
+                                                    }
+                                                @endphp
+                                                {{ $timeDisplay }}
+                                            </td>
                                             <td class="text-end">{{ number_format($booking->payment?->amount ?? $booking->arena->price) }}đ</td>
                                         </tr>
                                     @endforeach

@@ -1,0 +1,4 @@
+\App\Models\User::with('role')->first()
+\App\Models\User::all()->toArray()
+\App\Models\Role::all()->toArray()
+

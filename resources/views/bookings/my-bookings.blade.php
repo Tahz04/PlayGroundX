@@ -71,7 +71,29 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="text-muted small">Giờ chơi</div>
-                                        <div class="fw-bold text-primary">{{ $booking->timeSlot->formattedTime() }}</div>
+                                        <div class="fw-bold text-primary">
+                                            @php
+                                                $timeDisplay = 'N/A';
+                                                $hasNewFormat = isset($booking->start_time, $booking->end_time) && 
+                                                               !is_null($booking->start_time) && 
+                                                               !is_null($booking->end_time) && 
+                                                               $booking->start_time !== '' && 
+                                                               $booking->end_time !== '';
+                                                
+                                                if ($hasNewFormat) {
+                                                    try {
+                                                        $start = \Carbon\Carbon::createFromFormat('H:i:s', $booking->start_time)->format('H:i');
+                                                        $end = \Carbon\Carbon::createFromFormat('H:i:s', $booking->end_time)->format('H:i');
+                                                        $timeDisplay = $start . ' - ' . $end;
+                                                    } catch (\Exception $e) {
+                                                        $timeDisplay = 'Error';
+                                                    }
+                                                } elseif ($booking->timeSlot) {
+                                                    $timeDisplay = $booking->timeSlot->formattedTime();
+                                                }
+                                            @endphp
+                                            {{ $timeDisplay }}
+                                        </div>
                                     </div>
                                 </div>
 

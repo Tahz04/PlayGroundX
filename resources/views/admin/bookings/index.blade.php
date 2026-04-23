@@ -43,7 +43,29 @@
                             </td>
                             <td>
                                 <div><i class="far fa-calendar-alt me-1"></i>{{ date('d/m/Y', strtotime($booking->date)) }}</div>
-                                <div class="fw-bold text-primary small"><i class="far fa-clock me-1"></i>{{ $booking->timeSlot->formattedTime() }}</div>
+                                <div class="fw-bold text-primary small"><i class="far fa-clock me-1"></i>
+                                    @php
+                                        $timeDisplay = 'N/A';
+                                        $hasNewFormat = isset($booking->start_time, $booking->end_time) && 
+                                                       !is_null($booking->start_time) && 
+                                                       !is_null($booking->end_time) && 
+                                                       $booking->start_time !== '' && 
+                                                       $booking->end_time !== '';
+                                        
+                                        if ($hasNewFormat) {
+                                            try {
+                                                $start = \Carbon\Carbon::createFromFormat('H:i:s', $booking->start_time)->format('H:i');
+                                                $end = \Carbon\Carbon::createFromFormat('H:i:s', $booking->end_time)->format('H:i');
+                                                $timeDisplay = $start . ' - ' . $end;
+                                            } catch (\Exception $e) {
+                                                $timeDisplay = 'Error';
+                                            }
+                                        } elseif ($booking->timeSlot) {
+                                            $timeDisplay = $booking->timeSlot->formattedTime();
+                                        }
+                                    @endphp
+                                    {{ $timeDisplay }}
+                                </div>
                             </td>
                             <td>
                                 @php

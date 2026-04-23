@@ -18,7 +18,9 @@ class OwnerBookingController extends Controller
         
         $bookings = Booking::with(['arena', 'user', 'timeSlot', 'payment'])
             ->whereIn('arena_id', $arenaIds)
+            ->orderByRaw('CASE WHEN start_time IS NOT NULL THEN 0 ELSE 1 END')
             ->orderBy('date', 'desc')
+            ->orderBy('start_time', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -30,8 +32,15 @@ class OwnerBookingController extends Controller
      */
     public function updateStatus(Request $request, Booking $booking)
     {
+        $user = Auth::user();
+        
+        // Ensure relationships are loaded
+        if (!$user->relationLoaded('arenas')) {
+            $user->load('arenas');
+        }
+        
         // Kiểm tra booking thuộc sân của owner
-        $arenaIds = Auth::user()->arenas()->pluck('id');
+        $arenaIds = $user->arenas()->pluck('id');
         if (!$arenaIds->contains($booking->arena_id)) {
             abort(403, 'Bạn không có quyền thao tác trên đơn đặt này');
         }
@@ -55,12 +64,19 @@ class OwnerBookingController extends Controller
         return back()->with('success', "Đã {$statusText} đơn đặt sân thành công!");
     }
 
-    /**
-     * Xác nhận đơn đặt sân
-     */
     public function confirm(Booking $booking)
     {
-        $this->authorizeOwner($booking->arena);
+        $user = Auth::user();
+        
+        // Ensure relationships are loaded
+        if (!$user->relationLoaded('arenas')) {
+            $user->load('arenas');
+        }
+        
+        $arenaIds = $user->arenas()->pluck('id');
+        if (!$arenaIds->contains($booking->arena_id)) {
+            abort(403, 'Bạn không có quyền thao tác trên đơn đặt này');
+        }
         
         $booking->update(['status' => 'confirmed']);
         
@@ -76,7 +92,17 @@ class OwnerBookingController extends Controller
      */
     public function cancel(Booking $booking)
     {
-        $this->authorizeOwner($booking->arena);
+        $user = Auth::user();
+        
+        // Ensure relationships are loaded
+        if (!$user->relationLoaded('arenas')) {
+            $user->load('arenas');
+        }
+        
+        $arenaIds = $user->arenas()->pluck('id');
+        if (!$arenaIds->contains($booking->arena_id)) {
+            abort(403, 'Bạn không có quyền thao tác trên đơn đặt này');
+        }
         
         $booking->update(['status' => 'cancelled']);
         

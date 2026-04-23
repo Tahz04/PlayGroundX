@@ -14,13 +14,24 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, string $roles): Response
     {
-        if (!Auth::check() || !Auth::user()->role) {
+        if (!Auth::check()) {
+            return redirect('/')->with('error', 'Bạn cần đăng nhập trước.');
+        }
+
+        $user = Auth::user();
+        
+        // Ensure role is loaded
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+        
+        if (!$user->role) {
             return redirect('/')->with('error', 'Bạn không có quyền truy cập vào khu vực này.');
         }
 
         $allowedRoles = explode('|', $roles);
 
-        if (!in_array(Auth::user()->role->name, $allowedRoles, true)) {
+        if (!in_array($user->role->name, $allowedRoles, true)) {
             return redirect('/')->with('error', 'Bạn không có quyền truy cập vào khu vực này.');
         }
 

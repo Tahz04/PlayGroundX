@@ -223,15 +223,61 @@ document.addEventListener('DOMContentLoaded', function () {
     const dateInput = document.getElementById('date');
     const bookedSlotIds = @json($bookedSlotIds);
 
-    const updateBookedSlots = (bookedIds) => {
-        // We need to disable options that correspond to booked slots
-        // This is complex because a booking might block multiple 30-min slots
+    // Helper to check if two time ranges overlap
+    const timeRangesOverlap = (start1, end1, start2, end2) => {
+        const start1Min = timeToMinutes(start1);
+        const end1Min = timeToMinutes(end1);
+        const start2Min = timeToMinutes(start2);
+        const end2Min = timeToMinutes(end2);
+        return !(end1Min <= start2Min || start1Min >= end2Min);
+    };
+
+    // Check if a time range conflicts with any booked ranges
+    const hasConflict = (startTime, endTime, bookedRanges) => {
+        if (!bookedRanges || bookedRanges.length === 0) return false;
+        
+        for (const range of bookedRanges) {
+            if (timeRangesOverlap(startTime, endTime, range.start, range.end)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    let bookedRanges = [];
+
+    const updateBookedSlots = (data) => {
+        // Handle both old format (bookedSlotIds) and new format (bookedRanges)
+        if (data.bookedRanges) {
+            bookedRanges = data.bookedRanges;
+        } else if (data.bookedSlotIds) {
+            // For backward compatibility with old format
+            bookedRanges = [];
+        }
+
+        // Update start select options
         for (const option of startSelect.options) {
-            const slotId = parseInt(option.dataset.slotId);
-            if (bookedIds.includes(slotId)) {
+            if (!option.value) continue;
+            
+            // Check if selecting this start time would create a conflict
+            // We check with a default 1-hour duration
+            const startTime = option.value;
+            const endTime = (() => {
+                const start = timeToMinutes(startTime);
+                const end = start + 60;
+                const endHour = Math.floor(end / 60);
+                const endMin = end % 60;
+                return String(endHour).padStart(2, '0') + ':' + String(endMin).padStart(2, '0');
+            })();
+
+            const hasConflictStart = hasConflict(startTime, endTime, bookedRanges);
+            
+            if (hasConflictStart) {
                 option.disabled = true;
                 option.classList.add('text-muted');
-                option.innerHTML += ' (Hết)';
+                if (!option.innerHTML.includes('Hết')) {
+                    option.innerHTML = option.value + ' (Hết)';
+                }
             } else {
                 option.disabled = false;
                 option.classList.remove('text-muted');
@@ -239,14 +285,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         
-        // Similar for endSelect but end time represents the end of the slot
-        // If 06:00-06:30 is booked, 06:30 is the earliest available start
-        // And 06:30 is NOT a valid end for a NEW booking starting at 06:00
         syncEndOptions();
     };
 
     // Initialize with data from server
-    updateBookedSlots(bookedSlotIds);
+    if (@json($bookedRanges)) {
+        bookedRanges = @json($bookedRanges);
+    }
+    updateBookedSlots({ bookedSlotIds, bookedRanges });
 
     if (dateInput) {
         dateInput.addEventListener('change', function() {
@@ -254,7 +300,10 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`{{ route('bookings.booked-slots', $arena) }}?date=${date}`)
                 .then(response => response.json())
                 .then(data => {
-                    updateBookedSlots(data.bookedSlotIds);
+                    if (data.bookedRanges) {
+                        bookedRanges = data.bookedRanges;
+                    }
+                    updateBookedSlots(data);
                     setButtonState();
                 });
         });
@@ -319,7 +368,14 @@ document.addEventListener('DOMContentLoaded', function () {
         for (const option of endSelect.options) {
             if (!option.value) continue;
             const endMinutes = timeToMinutes(option.value);
-            option.disabled = startVal && endMinutes <= startMinutes;
+            
+            // Disable if end time is before or equal start time
+            const isBeforeStart = startVal && endMinutes <= startMinutes;
+            
+            // Check if this range would conflict with booked slots
+            const rangeConflict = startVal && hasConflict(startVal, option.value, bookedRanges);
+            
+            option.disabled = isBeforeStart || rangeConflict;
         }
 
         if (endSelect.selectedOptions.length > 0 && endSelect.selectedOptions[0].disabled) {

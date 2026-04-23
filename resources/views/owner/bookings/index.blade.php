@@ -49,7 +49,32 @@
                                 </td>
                                 <td>
                                     <div class="fw-semibold">{{ date('d/m/Y', strtotime($booking->date)) }}</div>
-                                    <div class="text-muted small">{{ $booking->timeSlot->formattedTime() }}</div>
+                                    <div class="text-muted small">
+                                        @php
+                                            $hasNewFormat = isset($booking->start_time, $booking->end_time) && 
+                                                           !is_null($booking->start_time) && 
+                                                           !is_null($booking->end_time) && 
+                                                           $booking->start_time !== '' && 
+                                                           $booking->end_time !== '';
+                                        $hasOldFormat = $booking->timeSlot && $booking->timeSlot !== null;
+                                        $startDisplay = 'N/A';
+                                        $endDisplay = 'N/A';
+                                        
+                                        if ($hasNewFormat) {
+                                            try {
+                                                $startDisplay = \Carbon\Carbon::createFromFormat('H:i:s', $booking->start_time)->format('H:i');
+                                                $endDisplay = \Carbon\Carbon::createFromFormat('H:i:s', $booking->end_time)->format('H:i');
+                                            } catch (\Exception $e) {
+                                                $startDisplay = 'Error';
+                                                $endDisplay = 'Error';
+                                            }
+                                        } elseif ($hasOldFormat) {
+                                            $startDisplay = explode('-', $booking->timeSlot->formattedTime())[0] ?? 'N/A';
+                                            $endDisplay = explode('-', $booking->timeSlot->formattedTime())[1] ?? 'N/A';
+                                        }
+                                    @endphp
+                                    {{ $startDisplay }} - {{ $endDisplay }}
+                                    </div>
                                 </td>
                                 <td>
                                     @if($booking->payment)

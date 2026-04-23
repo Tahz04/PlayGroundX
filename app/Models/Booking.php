@@ -11,6 +11,8 @@ class Booking extends Model
         'arena_id',
         'date',
         'time_slot_id',
+        'start_time',
+        'end_time',
         'status',
     ];
 

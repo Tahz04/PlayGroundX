@@ -47,6 +47,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/become-owner', [OwnerRequestController::class, 'requestOwner'])->name('owner-requests.store');
     Route::patch('/profile/password', [OwnerRequestController::class, 'changePassword'])->name('profile.password');
 
+    // Test debug route
+    Route::get('/test-auth', function () {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        return response()->json([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'role' => $user->role ? $user->role->name : null,
+            'role_id' => $user->role_id,
+            'arenas_count' => $user->arenas()->count(),
+            'arenas' => $user->arenas()->pluck('id')->toArray(),
+        ]);
+    })->name('test-auth');
+
     // Quản lý sân (Chỉ dành cho Chủ sân)
     Route::middleware(['role:owner'])->prefix('owner')->name('owner.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\OwnerDashboardController::class, 'index'])->name('dashboard');
@@ -54,6 +67,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/bookings', [\App\Http\Controllers\OwnerBookingController::class, 'index'])->name('bookings.index');
         Route::patch('/bookings/{booking}/confirm', [\App\Http\Controllers\OwnerBookingController::class, 'confirm'])->name('bookings.confirm');
         Route::patch('/bookings/{booking}/cancel', [\App\Http\Controllers\OwnerBookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\OwnerBookingController::class, 'updateStatus'])->name('bookings.update-status');
     });
 
     // Quản lý sân (Chỉ dành cho Admin)
