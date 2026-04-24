@@ -54,13 +54,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('arenas.index') ? 'active' : '' }}" href="{{ route('arenas.index') }}">
-                        <i class="fas fa-futbol me-1 d-lg-none d-xl-inline"></i> Sân Bóng
-                    </a>
-                </li>
+                        <a class="nav-link {{ request()->routeIs('arenas.index') ? 'active' : '' }}" href="{{ route('arenas.index') }}">
+                            <i class="fas fa-futbol me-1 d-lg-none d-xl-inline"></i> Sân Bóng
+                        </a>
+                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#bang-gia">
-                            <i class="fas fa-tags me-1"></i> Bảng Giá
+                        <a class="nav-link {{ request()->routeIs('arenas.available') ? 'active' : '' }}" href="{{ route('arenas.available') }}">
+                            <i class="fas fa-calendar-check me-1"></i> Lịch Trống
                         </a>
                     </li>
                     <li class="nav-item">

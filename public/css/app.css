@@ -382,6 +382,7 @@ img {
     50%      { box-shadow: 0 0 20px 5px rgba(16,185,129,0.1); }
 }
 
+
 .hero-title {
     font-family: var(--font-display);
     font-size: clamp(2.5rem, 6vw, 4.5rem);
@@ -816,6 +817,24 @@ img {
 .pitch-badge.available {
     background: rgba(16,185,129,0.9);
     color: #fff;
+}
+
+.pitch-badge.maintenance {
+    background: rgba(245, 158, 11, 0.95);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    animation: pulse-maintenance 2s infinite;
+}
+
+.pitch-badge.unavailable {
+    background: rgba(100, 116, 139, 0.9);
+    color: #fff;
+}
+
+@keyframes pulse-maintenance {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .pitch-badge.busy {

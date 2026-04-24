@@ -42,13 +42,24 @@
                                 @error('location') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold">Giá thuê/giờ (VNĐ)</label>
                                 <div class="input-group">
                                     <input type="number" name="price" class="form-control @error('price') is-invalid @enderror" placeholder="80000" value="{{ old('price', $arena->price) }}" required>
                                     <span class="input-group-text">đ</span>
                                 </div>
                                 @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Trạng Thái</label>
+                                <select name="status" class="form-select @error('status') is-invalid @enderror" required>
+                                    <option value="active"      {{ old('status', $arena->status) === 'active'      ? 'selected' : '' }}>✅ Đang hoạt động</option>
+                                    <option value="maintenance" {{ old('status', $arena->status) === 'maintenance' ? 'selected' : '' }}>🔧 Đang bảo trì</option>
+                                    <option value="inactive"    {{ old('status', $arena->status) === 'inactive'    ? 'selected' : '' }}>❌ Tạm ngưng</option>
+                                </select>
+                                @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="text-muted">Bảo trì: sân vẫn hiển thị nhưng không thể đặt.</small>
                             </div>
 
                             {{-- 🖼️ HIỂN THỊ ẢNH HIỆN TẠI --}}

@@ -478,7 +478,12 @@
                          data-id="{{ $arena->id }}"
                          data-type="{{ $arena->type }}">
                         
-                        <div class="court-badge">{{ $arena->type }}</div>
+                        <div class="d-flex gap-1 position-absolute top-0 end-0 m-3">
+                            <div class="court-badge">{{ $arena->type }}</div>
+                            @if($arena->status === 'maintenance')
+                                <div class="court-badge" style="background: #ffedd5; color: #9a3412;"><i class="fas fa-wrench me-1"></i>Bảo trì</div>
+                            @endif
+                        </div>
                         <h3 class="court-name">{{ $arena->name }}</h3>
                         
                         <div class="court-info">
@@ -598,16 +603,24 @@
                 .bindPopup(`
                     <div style="padding: 10px; min-width: 200px; font-family: sans-serif;">
                         <div style="font-weight: 800; font-size: 1.1rem; color: #1e293b; margin-bottom: 4px;">${arena.name}</div>
-                        <div style="color: #10b981; font-weight: 700; font-size: 0.8rem; margin-bottom: 12px;">${arena.type}</div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <div style="color: #10b981; font-weight: 700; font-size: 0.8rem;">${arena.type}</div>
+                            ${arena.status === 'maintenance' ? `<div style="background: #ffedd5; color: #9a3412; font-weight: 700; font-size: 0.7rem; padding: 2px 8px; border-radius: 50px;"><i class="fas fa-wrench me-1"></i>BẢO TRÌ</div>` : ''}
+                        </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f1f5f9; padding-top: 12px; margin-top: 8px;">
                             <div>
                                 <span style="font-weight: 800; font-size: 1rem; color: #1e293b;">${new Intl.NumberFormat('vi-VN').format(arena.price)}đ</span>
                                 <div style="font-size: 0.65rem; color: #64748b;">/ giờ</div>
                             </div>
-                            <button onclick="window.getDirections(${arena.latitude}, ${arena.longitude}, '${arena.name.replace(/'/g, "\\'")}')" 
-                                class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px;">
-                                <i class="fas fa-directions"></i> Chỉ đường
-                            </button>
+                            ${arena.status === 'maintenance' ? 
+                                `<button class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px; background: #94a3b8 !important; cursor: not-allowed;" disabled>
+                                    <i class="fas fa-tools"></i> Bảo trì
+                                </button>` :
+                                `<button onclick="window.getDirections(${arena.latitude}, ${arena.longitude}, '${arena.name.replace(/'/g, "\\'")}')" 
+                                    class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px;">
+                                    <i class="fas fa-directions"></i> Chỉ đường
+                                </button>`
+                            }
                         </div>
                     </div>
                 `);

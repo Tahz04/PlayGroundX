@@ -53,7 +53,13 @@
         <i class="fas fa-image fa-3x text-muted"></i>
     </div>
 @endif
-                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
+                            @if($arena->isMaintenance())
+                                <span class="pitch-badge maintenance"><i class="fas fa-wrench me-1"></i>Bảo trì</span>
+                            @elseif($arena->isActive())
+                                <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
+                            @else
+                                <span class="pitch-badge unavailable"><i class="fas fa-times-circle me-1"></i>Hết chỗ</span>
+                            @endif
                             <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
                             <div class="pitch-overlay"></div>
                         </div>
@@ -74,7 +80,13 @@
                                     </a>
                                 </div>
                                 <div class="col-6">
-                                    <a href="{{ route('bookings.create', $arena) }}" class="btn btn-primary btn-sm w-100 fw-bold">Đặt Sân</a>
+                                    @if($arena->isMaintenance())
+                                        <button class="btn btn-secondary btn-sm w-100 disabled" disabled>
+                                            <i class="fas fa-tools me-1"></i>Bảo trì
+                                        </button>
+                                    @else
+                                        <a href="{{ route('bookings.create', $arena) }}" class="btn btn-primary btn-sm w-100 fw-bold">Đặt Sân</a>
+                                    @endif
                                 </div>
                             </div>
                         </div>

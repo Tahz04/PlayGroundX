@@ -3,17 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arena;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ArenaController extends Controller
 {
     /**
+     * Display available time slots for all arenas on a chosen date.
+     */
+    public function availableIndex(Request $request)
+    {
+        $date = $request->get('date', now()->toDateString());
+
+        $query = Arena::whereIn('status', ['active', 'maintenance']);
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $arenas = $query->orderBy('name')->paginate(20)->withQueryString();
+
+        $bookingsByArena = Booking::whereIn('arena_id', $arenas->pluck('id'))
+            ->where('date', $date)
+            ->whereIn('status', ['pending', 'confirmed', 'paid'])
+            ->with('timeSlot')
+            ->get()
+            ->groupBy('arena_id')
+            ->map(function ($bookings) {
+                return $bookings->map(function ($b) {
+                    if ($b->start_time && $b->end_time) {
+                        $end = substr($b->end_time, 0, 5);
+                        return [
+                            'start' => substr($b->start_time, 0, 5),
+                            'end'   => $end === '00:00' ? '24:00' : $end,
+                        ];
+                    } elseif ($b->timeSlot) {
+                        return [
+                            'start' => substr($b->timeSlot->start_time, 0, 5),
+                            'end'   => $b->timeSlot->end_time === '00:00:00' ? '24:00' : substr($b->timeSlot->end_time, 0, 5),
+                        ];
+                    }
+                    return null;
+                })->filter()->values()->toArray();
+            });
+
+        return view('arenas.available', compact('arenas', 'bookingsByArena', 'date'));
+    }
+
+    /**
      * Display a listing of the resource for public.
      */
     public function publicIndex(Request $request)
     {
-        $query = Arena::where('status', true);
+        $query = Arena::whereIn('status', ['active', 'maintenance']);
 
         // Search by name or location
         if ($request->has('search') && !empty($request->search)) {
@@ -92,13 +138,14 @@ class ArenaController extends Controller
     public function update(Request $request, Arena $arena)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|in:Sân 5,Sân 7,Sân 11',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'latitude' => 'required|numeric',
+            'name'      => 'required|string|max:255',
+            'type'      => 'required|string|in:Sân 5,Sân 7,Sân 11',
+            'location'  => 'required|string|max:255',
+            'price'     => 'required|numeric|min:0',
+            'status'    => 'required|string|in:active,maintenance,inactive',
+            'latitude'  => 'required|numeric',
             'longitude' => 'required|numeric',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Xử lý upload ảnh mới

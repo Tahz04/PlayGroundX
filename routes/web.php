@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Route;
 
 // Trang chủ
 Route::get('/', function () {
-    $arenas = \App\Models\Arena::where('status', true)->take(6)->get();
+    $arenas = \App\Models\Arena::whereIn('status', ['active', 'maintenance'])->take(6)->get();
     return view('welcome', compact('arenas'));
 })->name('home');
 
 // Bản đồ và Sân bãi
 Route::get('/ban-do', [MapController::class, 'index'])->name('map');
 Route::get('/san-bong', [ArenaController::class, 'publicIndex'])->name('arenas.index');
+Route::get('/lich-trong', [ArenaController::class, 'availableIndex'])->name('arenas.available');
 Route::get('/api/arenas', [MapController::class, 'getArenas']);
 
 // Auth routes (chỉ dành cho khách chưa đăng nhập)

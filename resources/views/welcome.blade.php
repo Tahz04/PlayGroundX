@@ -29,12 +29,12 @@
         <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
             <div class="hero-badge">
                 <i class="fas fa-bolt"></i>
-                <span>#1 Nền tảng đặt sân tại Việt Nam</span>
+                <span>#1 Đặt Sân Tại Việt Nam</span>
             </div>
 
             <div class="promotion-badge mt-3 mb-3" data-aos="fade-left" data-aos-delay="500">
                 <i class="fas fa-gift text-warning me-2"></i>
-                <span class="text-white fw-bold">SIÊU ƯU ĐÃI: Giảm ngay 10% khi đặt từ 3 giờ trở lên!</span>
+                <span class="text-white fw-bold">ƯU ĐÃI: Giảm 10% khi đặt trên 3 giờ!</span>
             </div>
 
             <h1 class="hero-title">
@@ -44,25 +44,24 @@
             </h1>
 
             <p class="hero-subtitle">
-                Khám phá hàng trăm sân bóng đá chất lượng cao trên toàn quốc. 
-                Đặt sân chỉ với vài cú click, thanh toán an toàn, chơi bóng ngay!
+                Hàng trăm sân bóng chất lượng, đặt sân nhanh, thanh toán an toàn và uy tín.
             </p>
 
             <div class="hero-actions">
                 <a href="{{ route('map') }}" class="btn-hero-primary">
                     <i class="fas fa-search"></i>
-                    Tìm Sân Ngay
+                    Đặt Sân Ngay
                 </a>
                 <a href="#tinh-nang" class="btn-hero-secondary">
                     <i class="fas fa-play-circle"></i>
-                    Tìm Hiểu Thêm
+                    Khám Phá
                 </a>
             </div>
 
             <div class="hero-stats" data-aos="fade-up" data-aos-delay="200">
                 <div class="stat-item">
                     <span class="stat-number" data-count="500" data-suffix="+">0</span>
-                    <span class="stat-label">Sân Bóng Đá</span>
+                    <span class="stat-label">Sân Bóng</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number" data-count="25000" data-suffix="+">0</span>
@@ -242,71 +241,15 @@
                                     <i class="fas fa-image fa-3x text-muted"></i>
                                 </div>
                             @endif
-                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
-                            <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
-                            <div class="pitch-overlay"></div>
-                        </div>
-                        <div class="pitch-info">
-                            <h3 class="pitch-name">{{ $arena->name }}</h3>
-                            <div class="pitch-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>{{ Str::limit($arena->location, 50) }}</span>
-                            </div>
-                            <div class="pitch-meta">
-                                <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
-                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
-                            </div>
-                            <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
-                                <i class="fas fa-calendar-check"></i>
-                                Đặt Sân Ngay
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted">Đang cập nhật danh sách sân...</p>
-                </div>
-            @endforelse
-        </div>
-
-        <div class="text-center mt-5" data-aos="fade-up">
-            <a href="{{ route('arenas.index') }}" class="btn-hero-secondary" style="color: var(--clr-dark-900); border-color: var(--clr-dark-300);">
-                <i class="fas fa-th-large"></i>
-                Xem Tất Cả Sân Bóng
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-    <!-- ==================== PITCHES ==================== -->
-<section class="pitches-section" id="san-bong">
-    <div class="container">
-        <div class="section-header" data-aos="fade-up">
-            <div class="section-badge">
-                <i class="fas fa-futbol"></i>
-                <span>Sân bóng nổi bật</span>
-            </div>
-            <h2 class="section-title">Sân Bóng <span class="accent">Hàng Đầu</span></h2>
-            <p class="section-desc">Những sân bóng chất lượng cao, được đánh giá tốt nhất bởi cộng đồng người chơi</p>
-        </div>
-
-        <div class="row g-4">
-            @forelse($arenas as $arena)
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                    <div class="pitch-card">
-                        <div class="pitch-image">
-                            {{-- 🖼️ CHỈ HIỂN THỊ ẢNH ĐÃ UPLOAD --}}
-                            @if($arena->image)
-                                <img src="{{ asset('storage/' . $arena->image) }}" alt="{{ $arena->name }}" style="width: 100%; height: 200px; object-fit: cover;">
+                            
+                            @if($arena->isMaintenance())
+                                <span class="pitch-badge maintenance"><i class="fas fa-wrench me-1"></i>Đang bảo trì</span>
+                            @elseif($arena->isActive())
+                                <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
                             @else
-                                {{-- KHÔNG HIỂN THỊ GÌ HOẶC HIỂN THỊ ICON MẶC ĐỊNH --}}
-                                <div style="width: 100%; height: 200px; background: #e9ecef; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-image fa-3x text-muted"></i>
-                                </div>
+                                <span class="pitch-badge unavailable"><i class="fas fa-times-circle me-1"></i>Ngừng hoạt động</span>
                             @endif
-                            <span class="pitch-badge available"><i class="fas fa-check-circle me-1"></i>Sẵn sàng</span>
+                            
                             <span class="pitch-type-badge"><i class="fas fa-users me-1"></i>{{ $arena->type }}</span>
                             <div class="pitch-overlay"></div>
                         </div>
@@ -320,10 +263,17 @@
                                 <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
                                 <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
                             </div>
-                            <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
-                                <i class="fas fa-calendar-check"></i>
-                                Đặt Sân Ngay
-                            </a>
+                            @if($arena->isMaintenance())
+                                <button class="btn-book disabled w-100" disabled style="background: var(--clr-dark-300); cursor: not-allowed; opacity: 0.8;">
+                                    <i class="fas fa-tools"></i>
+                                    Đang Bảo Trì
+                                </button>
+                            @else
+                                <a href="{{ route('bookings.create', $arena) }}" class="btn-book">
+                                    <i class="fas fa-calendar-check"></i>
+                                    Đặt Sân Ngay
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -343,6 +293,8 @@
         </div>
     </div>
 </section>
+
+
 
     <!-- ==================== TESTIMONIALS ==================== -->
     <section class="testimonials-section">
