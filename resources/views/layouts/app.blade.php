@@ -280,5 +280,287 @@
     <script src="{{ asset('js/app.js') }}"></script>
 
     @stack('scripts')
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget" class="chatbot-widget">
+        <button id="chatbot-toggle" class="chatbot-toggle">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+        <div id="chatbot-window" class="chatbot-window hidden">
+            <div class="chatbot-header">
+                <div class="d-flex align-items-center">
+                    <div class="chatbot-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="ms-2">
+                        <h6 class="mb-0 fw-bold">Trợ Lý PlayGroundX</h6>
+                        <small class="text-white-50">Sẵn sàng hỗ trợ</small>
+                    </div>
+                </div>
+                <button id="chatbot-close" class="btn-close btn-close-white"></button>
+            </div>
+            <div id="chatbot-messages" class="chatbot-messages">
+                <!-- Messages will be injected here -->
+            </div>
+            <div class="chatbot-footer">
+                <small class="text-muted d-block text-center"><i class="fas fa-bolt text-warning"></i> Được hỗ trợ bởi PlayGroundX AI</small>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .chatbot-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            font-family: 'Inter', sans-serif;
+        }
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--clr-primary-400), var(--clr-primary-500));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            transform-origin: bottom right;
+        }
+        .chatbot-window.hidden {
+            transform: scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--clr-dark-900), var(--clr-dark-800));
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chatbot-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--clr-primary-400);
+        }
+        .chatbot-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        .chat-bubble.bot {
+            background: white;
+            color: var(--clr-dark-800);
+            border: 1px solid #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-bubble.user {
+            background: var(--clr-primary-500);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        .chat-btn {
+            background: white;
+            border: 1px solid var(--clr-primary-400);
+            color: var(--clr-primary-500);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .chat-btn:hover {
+            background: var(--clr-primary-50);
+        }
+        .chatbot-footer {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 5px 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--clr-dark-300);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('chatbot-toggle');
+            const closeBtn = document.getElementById('chatbot-close');
+            const chatWindow = document.getElementById('chatbot-window');
+            const messagesContainer = document.getElementById('chatbot-messages');
+            let isFirstLoad = true;
+
+            toggleBtn.addEventListener('click', () => {
+                chatWindow.classList.toggle('hidden');
+                if(isFirstLoad && !chatWindow.classList.contains('hidden')) {
+                    sendAction('hello');
+                    isFirstLoad = false;
+                }
+            });
+
+            closeBtn.addEventListener('click', () => {
+                chatWindow.classList.add('hidden');
+            });
+
+            function showTyping() {
+                const id = 'typing-' + Date.now();
+                const html = `<div id="${id}" class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+                messagesContainer.insertAdjacentHTML('beforeend', html);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                return id;
+            }
+
+            function removeTyping(id) {
+                const el = document.getElementById(id);
+                if(el) el.remove();
+            }
+
+            function addMessage(text, type) {
+                const html = `<div class="chat-bubble ${type}">${text}</div>`;
+                messagesContainer.insertAdjacentHTML('beforeend', html);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function addOptions(options) {
+                if(!options || options.length === 0) return;
+                let html = '<div class="chat-options">';
+                options.forEach(opt => {
+                    html += `<button class="chat-btn" data-action="${opt.action}" ${opt.url ? `data-url="${opt.url}"` : ''}>${opt.text}</button>`;
+                });
+                html += '</div>';
+                messagesContainer.insertAdjacentHTML('beforeend', html);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // Add event listeners to new buttons
+                const buttons = messagesContainer.querySelectorAll('.chat-options:last-child .chat-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const url = this.getAttribute('data-url');
+                        if (url) {
+                            window.location.href = url;
+                            return;
+                        }
+                        
+                        const action = this.getAttribute('data-action');
+                        const text = this.innerText;
+                        
+                        // Add user message
+                        addMessage(text, 'user');
+                        
+                        // Remove options
+                        this.parentElement.remove();
+                        
+                        // Send request
+                        sendAction(action);
+                    });
+                });
+            }
+
+            function sendAction(action) {
+                const typingId = showTyping();
+                
+                fetch('{{ route('chatbot.handle') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ action: action })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    setTimeout(() => {
+                        removeTyping(typingId);
+                        if (data.messages && data.messages.length > 0) {
+                            data.messages.forEach(msg => addMessage(msg, 'bot'));
+                        }
+                        if (data.options) {
+                            addOptions(data.options);
+                        }
+                    }, 600); // Fake delay for typing feel
+                })
+                .catch(err => {
+                    removeTyping(typingId);
+                    addMessage('Xin lỗi, hệ thống chat đang bận. Vui lòng thử lại sau!', 'bot');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

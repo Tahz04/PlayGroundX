@@ -22,6 +22,9 @@ Route::get('/san-bong', [ArenaController::class, 'publicIndex'])->name('arenas.i
 Route::get('/lich-trong', [ArenaController::class, 'availableIndex'])->name('arenas.available');
 Route::get('/api/arenas', [MapController::class, 'getArenas']);
 
+// Chatbot API
+Route::post('/api/chatbot', [\App\Http\Controllers\ChatbotController::class, 'handle'])->name('chatbot.handle');
+
 // Auth routes (chỉ dành cho khách chưa đăng nhập)
 Route::middleware('guest')->group(function () {
     Route::get('/dang-ky',     [AuthController::class, 'showRegister'])->name('register');
