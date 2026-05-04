@@ -242,11 +242,25 @@ class BookingController extends Controller
             // Dùng đơn đầu tiên làm đại diện thông báo
             if (!empty($createdBookingIds)) {
                 $firstBooking = Booking::find($createdBookingIds[0]);
+                $msg = Auth::user()->name . ' vừa đặt sân ' . $arena->name;
+                
                 \Illuminate\Support\Facades\Notification::send($receivers->unique('id'), new \App\Notifications\BookingNotification(
                     $firstBooking, 
                     'created', 
-                    Auth::user()->name . ' vừa đặt sân ' . $arena->name
+                    $msg
                 ));
+
+                // Gửi thông báo Telegram cho Admin
+                if (env('TELEGRAM_BOT_TOKEN')) {
+                    $zaloMessage = "<b>🎉 CÓ ĐƠN ĐẶT SÂN MỚI</b>\n\n";
+                    $zaloMessage .= "👤 <b>Khách hàng:</b> " . Auth::user()->name . "\n";
+                    $zaloMessage .= "⚽ <b>Sân:</b> " . $arena->name . "\n";
+                    $zaloMessage .= "📅 <b>Ngày:</b> " . $firstBooking->date . "\n";
+                    $zaloMessage .= "⏰ <b>Giờ:</b> " . $startTimeStr . " - " . $endTimeStr . "\n";
+                    $zaloMessage .= "💰 <b>Tổng tiền:</b> " . number_format($totalPrice) . " VNĐ\n";
+                    
+                    \App\Services\TelegramService::sendMessage($zaloMessage);
+                }
             }
         } catch (\Exception $e) {
             // Log error if needed, but don't break the booking flow
@@ -488,11 +502,23 @@ class BookingController extends Controller
                 }
             }
 
+            $msg = Auth::user()->name . ' vừa hủy đơn đặt sân ' . $booking->arena->name;
             \Illuminate\Support\Facades\Notification::send($receivers->unique('id'), new \App\Notifications\BookingNotification(
                 $booking, 
                 'cancelled', 
-                Auth::user()->name . ' vừa hủy đơn đặt sân ' . $booking->arena->name
+                $msg
             ));
+
+            // Gửi thông báo Telegram cho Admin
+            if (env('TELEGRAM_BOT_TOKEN')) {
+                $zaloMessage = "<b>⚠️ KHÁCH HÀNG HỦY ĐƠN ĐẶT SÂN</b>\n\n";
+                $zaloMessage .= "👤 <b>Khách hàng:</b> " . Auth::user()->name . "\n";
+                $zaloMessage .= "⚽ <b>Sân:</b> " . $booking->arena->name . "\n";
+                $zaloMessage .= "📅 <b>Ngày:</b> " . $booking->date . "\n";
+                $zaloMessage .= "⏰ <b>Giờ:</b> " . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . "\n";
+                
+                \App\Services\TelegramService::sendMessage($zaloMessage);
+            }
         } catch (\Exception $e) {
             // Log error if needed
         }
