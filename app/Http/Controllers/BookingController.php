@@ -298,6 +298,26 @@ class BookingController extends Controller
     }
 
     /**
+     * Confirm user has paid via transfer.
+     */
+    public function confirmPayment(Request $request)
+    {
+        $bookings = $this->getUserBookingsFromQuery($request);
+        
+        if ($bookings->isEmpty()) {
+            return back()->with('error', 'Không tìm thấy đơn đặt sân.');
+        }
+
+        foreach ($bookings as $booking) {
+            if ($booking->payment && $booking->payment->status === 'unpaid') {
+                $booking->payment->update(['status' => 'pending']);
+            }
+        }
+
+        return redirect()->route('bookings.my-bookings')->with('success', 'Đã gửi yêu cầu xác nhận thanh toán. Vui lòng chờ admin kiểm tra.');
+    }
+
+    /**
      * Ensure standard 30-minute slots from 06:00 to 24:00 are available.
      */
     private function ensureStandardTimeSlots(): void

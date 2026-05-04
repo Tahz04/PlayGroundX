@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/dat-san', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/hoa-don-dat-san', [BookingController::class, 'bill'])->name('bookings.bill');
     Route::get('/thanh-toan/chuyen-khoan', [BookingController::class, 'paymentTransfer'])->name('bookings.payment-transfer');
+    Route::patch('/thanh-toan/xac-nhan', [BookingController::class, 'confirmPayment'])->name('bookings.confirm-payment');
     Route::get('/lich-su-dat-san', [BookingController::class, 'myBookings'])->name('bookings.my-bookings');
     Route::delete('/dat-san/{booking}/huy', [BookingController::class, 'cancel'])->name('bookings.user-cancel');
     Route::get('/api/booked-slots/{arena}', [BookingController::class, 'getBookedSlots'])->name('bookings.booked-slots');

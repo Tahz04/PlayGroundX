@@ -110,7 +110,7 @@
                                     <option value="Đà Nẵng">Đà Nẵng</option>
                                     <option value="Huế">Huế</option>
                                     <option value="Đà Lạt">Đà Lạt</option>
-                                    <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                    <option value="TP.HCM">TP. Hồ Chí Minh</option>
                                 </select>
                             </div>
                         </div>

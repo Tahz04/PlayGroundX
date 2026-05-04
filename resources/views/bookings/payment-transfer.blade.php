@@ -59,6 +59,11 @@
                         </div>
 
                         <div class="d-flex flex-wrap gap-3 mt-4">
+                            <form action="{{ route('bookings.confirm-payment', ['bookings' => $bookingIdsParam]) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-success px-4"><i class="fas fa-check-circle me-1"></i> Tôi đã chuyển khoản</button>
+                            </form>
                             <a href="{{ route('bookings.bill', ['bookings' => $bookingIdsParam]) }}" class="btn btn-primary px-4">Xem chi tiết bill</a>
                             <a href="{{ route('bookings.my-bookings') }}" class="btn btn-outline-secondary px-4">Xem lịch sử đặt sân</a>
                         </div>

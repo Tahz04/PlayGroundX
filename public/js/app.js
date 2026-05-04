@@ -122,29 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(typeWord, 1000);
     }
 
-    // ===== Form Validation Feedback =====
-    const bookingForm = document.getElementById('quickBookingForm');
-    if (bookingForm) {
-        bookingForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            // Simple demo alert
-            const btn = this.querySelector('.btn-search-booking');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tìm...';
-            btn.disabled = true;
 
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Đã tìm thấy!';
-                btn.style.background = 'linear-gradient(135deg, #10b981, #34d399)';
-
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    btn.style.background = '';
-                }, 2000);
-            }, 1500);
-        });
-    }
 
     // ===== Back to Top Button =====
     const backToTop = document.getElementById('backToTop');
