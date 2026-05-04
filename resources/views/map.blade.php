@@ -38,7 +38,7 @@
         }
 
         .map-sidebar {
-            width: 400px;
+            width: 460px;
             height: 100%;
             background: #ffffff;
             box-shadow: 10px 0 30px rgba(0,0,0,0.05);
@@ -87,10 +87,13 @@
         .filter-container {
             padding: 1rem 1.5rem;
             display: flex;
+            align-items: center; /* Center items vertically */
             gap: 0.5rem;
             background: #fff;
             overflow-x: auto;
             scrollbar-width: none;
+            flex-shrink: 0; /* Prevent being squished vertically */
+            padding-bottom: 1rem; /* Restore normal padding */
         }
 
         .filter-chip {
@@ -140,15 +143,13 @@
         }
 
         .court-badge {
-            position: absolute;
-            top: 1.25rem;
-            right: 1.25rem;
             background: #dcfce7;
             color: #15803d;
-            padding: 2px 10px;
+            padding: 4px 12px;
             border-radius: 50px;
             font-size: 0.75rem;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .court-name {
@@ -156,6 +157,8 @@
             font-weight: 800;
             color: #1e293b;
             margin-bottom: 0.5rem;
+            padding-right: 65px; /* Prevent text overlapping with the badge */
+            line-height: 1.4;
         }
 
         .court-info {
@@ -165,6 +168,7 @@
             margin-bottom: 1rem;
             color: #64748b;
             font-size: 0.85rem;
+            line-height: 1.5;
         }
 
         .court-info div {
