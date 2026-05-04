@@ -19,7 +19,11 @@ class ArenaController extends Controller
         $query = Arena::whereIn('status', ['active', 'maintenance']);
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('location', 'like', "%$search%");
+            });
         }
         if ($request->filled('type')) {
             $query->where('type', $request->type);

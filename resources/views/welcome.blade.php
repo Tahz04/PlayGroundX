@@ -99,27 +99,25 @@
                     </div>
                 </div>
 
-                <form id="quickBookingForm">
+                <form id="quickBookingForm" method="GET" action="{{ route('arenas.available') }}">
                     <div class="row g-3">
                         <div class="col-md-3">
                             <div class="input-icon-wrap">
                                 <i class="fas fa-map-marker-alt input-icon"></i>
-                                <select class="form-select" id="bookingLocation">
-                                    <option selected disabled>Chọn khu vực</option>
-                                    <option>Quận 1 - TP.HCM</option>
-                                    <option>Quận 7 - TP.HCM</option>
-                                    <option>Quận 9 - TP.HCM</option>
-                                    <option>Quận Bình Thạnh</option>
-                                    <option>Quận Thủ Đức</option>
-                                    <option>Quận Gò Vấp</option>
-                                    <option>Quận Tân Bình</option>
+                                <select class="form-select" id="bookingLocation" name="search">
+                                    <option value="" selected>Chọn khu vực</option>
+                                    <option value="Hà Nội">Hà Nội</option>
+                                    <option value="Đà Nẵng">Đà Nẵng</option>
+                                    <option value="Huế">Huế</option>
+                                    <option value="Đà Lạt">Đà Lạt</option>
+                                    <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="input-icon-wrap">
                                 <i class="fas fa-calendar-alt input-icon"></i>
-                                <input type="date" class="form-control" id="bookingDate" value="{{ date('Y-m-d') }}">
+                                <input type="date" class="form-control" id="bookingDate" name="date" value="{{ date('Y-m-d') }}">
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -141,11 +139,11 @@
                         <div class="col-md-2">
                             <div class="input-icon-wrap">
                                 <i class="fas fa-futbol input-icon"></i>
-                                <select class="form-select" id="bookingType">
-                                    <option selected disabled>Loại sân</option>
-                                    <option>Sân 5</option>
-                                    <option>Sân 7</option>
-                                    <option>Sân 11</option>
+                                <select class="form-select" id="bookingType" name="type">
+                                    <option value="" selected>Loại sân</option>
+                                    <option value="Sân 5">Sân 5</option>
+                                    <option value="Sân 7">Sân 7</option>
+                                    <option value="Sân 11">Sân 11</option>
                                 </select>
                             </div>
                         </div>
