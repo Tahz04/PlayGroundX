@@ -225,6 +225,33 @@ class BookingController extends Controller
         $bookingIdsParam = implode('-', $createdBookingIds);
         $successMessage = 'Đã tạo lịch đặt từ ' . $startTimeStr . ' đến ' . $endTimeStr . ' thành công.';
 
+        // Gửi thông báo cho Admin và Chủ sân (nếu có)
+        try {
+            $admins = \App\Models\User::whereHas('role', function($q) {
+                $q->where('name', 'admin');
+            })->get();
+
+            $receivers = $admins;
+            if ($arena->owner_id) {
+                $owner = \App\Models\User::find($arena->owner_id);
+                if ($owner) {
+                    $receivers->push($owner);
+                }
+            }
+
+            // Dùng đơn đầu tiên làm đại diện thông báo
+            if (!empty($createdBookingIds)) {
+                $firstBooking = Booking::find($createdBookingIds[0]);
+                \Illuminate\Support\Facades\Notification::send($receivers->unique('id'), new \App\Notifications\BookingNotification(
+                    $firstBooking, 
+                    'created', 
+                    Auth::user()->name . ' vừa đặt sân ' . $arena->name
+                ));
+            }
+        } catch (\Exception $e) {
+            // Log error if needed, but don't break the booking flow
+        }
+
         if ($paymentMethod === 'bank_transfer') {
             return redirect()
                 ->route('bookings.payment-transfer', ['bookings' => $bookingIdsParam])
@@ -445,6 +472,29 @@ class BookingController extends Controller
         
         if ($booking->payment) {
             $booking->payment->update(['status' => 'failed']);
+        }
+
+        // Gửi thông báo cho Admin và Chủ sân (nếu có)
+        try {
+            $admins = \App\Models\User::whereHas('role', function($q) {
+                $q->where('name', 'admin');
+            })->get();
+
+            $receivers = $admins;
+            if ($booking->arena->owner_id) {
+                $owner = \App\Models\User::find($booking->arena->owner_id);
+                if ($owner) {
+                    $receivers->push($owner);
+                }
+            }
+
+            \Illuminate\Support\Facades\Notification::send($receivers->unique('id'), new \App\Notifications\BookingNotification(
+                $booking, 
+                'cancelled', 
+                Auth::user()->name . ' vừa hủy đơn đặt sân ' . $booking->arena->name
+            ));
+        } catch (\Exception $e) {
+            // Log error if needed
         }
 
         return back()->with('success', 'Đã hủy yêu cầu đặt sân.');

@@ -77,6 +77,12 @@ Route::middleware('auth')->group(function () {
         Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\OwnerBookingController::class, 'updateStatus'])->name('bookings.update-status');
     });
 
+    // Notifications
+    Route::post('/notifications/mark-read', function() {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back()->with('success', 'Đã đánh dấu tất cả thông báo là đã đọc.');
+    })->name('notifications.markAllAsRead');
+
     // Quản lý sân (Chỉ dành cho Admin)
         Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
             Route::resource('arenas', \App\Http\Controllers\ArenaController::class);

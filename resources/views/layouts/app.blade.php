@@ -81,7 +81,52 @@
                     @endguest
 
                     @auth
-                        <div class="dropdown">
+                        <div class="d-flex align-items-center">
+                            <!-- Notifications -->
+                            <div class="dropdown me-3">
+                                <a class="text-white position-relative text-decoration-none" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-bell fs-5"></i>
+                                    @if(Auth::user()->unreadNotifications->count() > 0)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                            {{ Auth::user()->unreadNotifications->count() }}
+                                        </span>
+                                    @endif
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                                    <li><h6 class="dropdown-header fw-bold">Thông báo mới</h6></li>
+                                    @forelse(Auth::user()->unreadNotifications as $notification)
+                                        <li>
+                                            <a class="dropdown-item py-2 border-bottom" href="{{ $notification->data['url'] ?? '#' }}">
+                                                <div class="d-flex align-items-start gap-2">
+                                                    @if($notification->data['action'] === 'created')
+                                                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2"><i class="fas fa-check"></i></div>
+                                                    @else
+                                                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-2"><i class="fas fa-times"></i></div>
+                                                    @endif
+                                                    <div>
+                                                        <p class="mb-0 text-wrap fw-semibold fs-6" style="font-size: 0.85rem !important;">{{ $notification->data['message'] }}</p>
+                                                        <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    @empty
+                                        <li><span class="dropdown-item text-muted text-center py-3">Không có thông báo mới</span></li>
+                                    @endforelse
+                                    @if(Auth::user()->unreadNotifications->count() > 0)
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form action="{{ route('notifications.markAllAsRead') }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item text-center text-primary fw-bold pb-2">Đánh dấu tất cả đã đọc</button>
+                                            </form>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+
+                            <!-- User Dropdown -->
+                            <div class="dropdown">
                             <button class="btn btn-outline-light btn-nav dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="userDropdown">
                                 <i class="fas fa-user-circle me-1"></i>
                                 {{ Auth::user()->name }}
@@ -152,6 +197,7 @@
                                     </form>
                                 </li>
                             </ul>
+                        </div>
                         </div>
                     @endauth
                 </div>
