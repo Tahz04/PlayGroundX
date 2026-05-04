@@ -20,6 +20,8 @@ class Arena extends Model
         'longitude',
         'status',
         'image',
+        'image_1',
+        'image_2',
     ];
 
     public function owner()

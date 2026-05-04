@@ -509,10 +509,15 @@
                                 {{ number_format($arena->price, 0, ',', '.') }}đ 
                                 <small class="text-muted" style="font-size: 0.7rem;">/ giờ</small>
                             </div>
-                            <button class="btn-direction" type="button" 
-                                    onclick="event.stopPropagation(); window.getDirections({{ $arena->latitude }}, {{ $arena->longitude }}, '{{ addslashes($arena->name) }}')">
-                                <i class="fas fa-directions"></i> Chỉ đường
-                            </button>
+                            <div style="display: flex; gap: 5px;">
+                                <a href="{{ route('arenas.show', $arena) }}" class="btn-direction" style="background: #10b981 !important; color: white !important; text-decoration: none; padding: 6px 12px !important;" onclick="event.stopPropagation();">
+                                    <i class="fas fa-info-circle"></i> Chi tiết
+                                </a>
+                                <button class="btn-direction" type="button" style="padding: 6px 12px !important;"
+                                        onclick="event.stopPropagation(); window.getDirections({{ $arena->latitude }}, {{ $arena->longitude }}, '{{ addslashes($arena->name) }}')">
+                                    <i class="fas fa-directions"></i> Chỉ đường
+                                </button>
+                            </div>
                         </div>
                     </div>
 @endforeach
@@ -616,15 +621,20 @@
                                 <span style="font-weight: 800; font-size: 1rem; color: #1e293b;">${new Intl.NumberFormat('vi-VN').format(arena.price)}đ</span>
                                 <div style="font-size: 0.65rem; color: #64748b;">/ giờ</div>
                             </div>
-                            ${arena.status === 'maintenance' ? 
-                                `<button class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px; background: #94a3b8 !important; cursor: not-allowed;" disabled>
-                                    <i class="fas fa-tools"></i> Bảo trì
-                                </button>` :
-                                `<button onclick="window.getDirections(${arena.latitude}, ${arena.longitude}, '${arena.name.replace(/'/g, "\\'")}')" 
-                                    class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px;">
-                                    <i class="fas fa-directions"></i> Chỉ đường
-                                </button>`
-                            }
+                            <div style="display: flex; gap: 5px;">
+                                <a href="/san-bong/${arena.id}" class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px; background: #10b981 !important; color: white !important; text-decoration: none;">
+                                    <i class="fas fa-info-circle"></i> Chi tiết
+                                </a>
+                                ${arena.status === 'maintenance' ? 
+                                    `<button class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px; background: #94a3b8 !important; cursor: not-allowed;" disabled>
+                                        <i class="fas fa-tools"></i>
+                                    </button>` :
+                                    `<button onclick="window.getDirections(${arena.latitude}, ${arena.longitude}, '${arena.name.replace(/'/g, "\\'")}')" 
+                                        class="btn-direction" style="font-size: 0.75rem; padding: 6px 12px;">
+                                        <i class="fas fa-directions"></i>
+                                    </button>`
+                                }
+                            </div>
                         </div>
                     </div>
                 `);

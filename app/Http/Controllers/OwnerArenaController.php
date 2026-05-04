@@ -45,10 +45,16 @@ class OwnerArenaController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'image' => 'nullable|image|max:2048',
+            'image_1' => 'nullable|image|max:2048',
+            'image_2' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('arenas', 'public');
+        foreach (['image', 'image_1', 'image_2'] as $imgField) {
+            if ($request->hasFile($imgField)) {
+                $file = $request->file($imgField);
+                $filename = time() . '_' . $imgField . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
+                $validated[$imgField] = $file->storeAs('arenas', $filename, 'public');
+            }
         }
 
         Auth::user()->arenas()->create($validated);
@@ -80,22 +86,23 @@ class OwnerArenaController extends Controller
         'latitude' => 'required|numeric',
         'longitude' => 'required|numeric',
         'image' => 'nullable|image|max:2048',
+        'image_1' => 'nullable|image|max:2048',
+        'image_2' => 'nullable|image|max:2048',
     ]);
 
     // Xử lý ảnh
-    if ($request->hasFile('image')) {
-        // Xóa ảnh cũ
-        if ($arena->image && Storage::disk('public')->exists($arena->image)) {
-            Storage::disk('public')->delete($arena->image);
+    foreach (['image', 'image_1', 'image_2'] as $imgField) {
+        if ($request->hasFile($imgField)) {
+            // Xóa ảnh cũ
+            if ($arena->$imgField && Storage::disk('public')->exists($arena->$imgField)) {
+                Storage::disk('public')->delete($arena->$imgField);
+            }
+            
+            // Lưu ảnh mới
+            $file = $request->file($imgField);
+            $filename = time() . '_' . $imgField . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
+            $validated[$imgField] = $file->storeAs('arenas', $filename, 'public');
         }
-        
-        // Lưu ảnh mới
-        $file = $request->file('image');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $imagePath = $file->storeAs('arenas', $filename, 'public');
-        $validated['image'] = $imagePath;
-        
-        Log::info('Image path to save: ' . $imagePath);
     }
 
     // Cập nhật
@@ -111,6 +118,13 @@ class OwnerArenaController extends Controller
     public function destroy(Arena $arena)
     {
         $this->authorizeOwner($arena);
+        
+        foreach (['image', 'image_1', 'image_2'] as $imgField) {
+            if ($arena->$imgField && Storage::disk('public')->exists($arena->$imgField)) {
+                Storage::disk('public')->delete($arena->$imgField);
+            }
+        }
+        
         $arena->delete();
 
         return redirect()->route('owner.arenas.index')->with('success', 'Xóa sân thành công!');

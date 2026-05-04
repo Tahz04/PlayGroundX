@@ -52,10 +52,22 @@
 
                             {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH --}}
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Ảnh Sân</label>
+                                <label class="form-label fw-semibold">Ảnh Đại Diện Sân (Avt)</label>
                                 <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
                                 <small class="text-muted">Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
                                 @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ảnh Phụ 1 (Tùy chọn)</label>
+                                <input type="file" name="image_1" class="form-control @error('image_1') is-invalid @enderror" accept="image/*">
+                                @error('image_1') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ảnh Phụ 2 (Tùy chọn)</label>
+                                <input type="file" name="image_2" class="form-control @error('image_2') is-invalid @enderror" accept="image/*">
+                                @error('image_2') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="col-12">

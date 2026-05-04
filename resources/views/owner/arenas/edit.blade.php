@@ -60,24 +60,46 @@
                                 @enderror
                             </div>
 
-                            {{-- 🖼️ THÊM PHẦN HIỂN THỊ ẢNH HIỆN TẠI --}}
-                            @if($arena->image)
+                            {{-- 🖼️ THÊM PHẦN HIỂN THỊ ẢNH HIỆN TẠI VÀ ĐỔI ẢNH --}}
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Ảnh Hiện Tại</label>
-                                <div class="mt-2">
-                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" class="rounded shadow-sm" style="width: 200px; height: 150px; object-fit: cover;">
+                                <label for="image" class="form-label fw-bold">Ảnh Đại Diện Sân (Avt)</label>
+                                @if($arena->image)
+                                <div class="mb-2">
+                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" class="rounded shadow-sm" style="width: 150px; height: 100px; object-fit: cover;">
                                 </div>
-                            </div>
-                            @endif
-
-                            {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH MỚI --}}
-                            <div class="mb-4">
-                                <label for="image" class="form-label fw-bold">Đổi Ảnh Sân</label>
+                                @endif
                                 <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                                <small class="text-muted">Để trống nếu không muốn đổi ảnh. Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
+                                <small class="text-muted">Để trống nếu không muốn đổi ảnh. (tối đa 2MB)</small>
                                 @error('image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="image_1" class="form-label fw-bold">Ảnh Phụ 1</label>
+                                    @if($arena->image_1)
+                                    <div class="mb-2">
+                                        <img src="{{ Storage::url($arena->image_1) }}" alt="Ảnh phụ 1" class="rounded shadow-sm" style="width: 100%; height: 100px; object-fit: cover;">
+                                    </div>
+                                    @endif
+                                    <input type="file" name="image_1" id="image_1" class="form-control @error('image_1') is-invalid @enderror" accept="image/*">
+                                    @error('image_1')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="image_2" class="form-label fw-bold">Ảnh Phụ 2</label>
+                                    @if($arena->image_2)
+                                    <div class="mb-2">
+                                        <img src="{{ Storage::url($arena->image_2) }}" alt="Ảnh phụ 2" class="rounded shadow-sm" style="width: 100%; height: 100px; object-fit: cover;">
+                                    </div>
+                                    @endif
+                                    <input type="file" name="image_2" id="image_2" class="form-control @error('image_2') is-invalid @enderror" accept="image/*">
+                                    @error('image_2')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div class="row g-3 mb-4">

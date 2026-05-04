@@ -62,22 +62,39 @@
                                 <small class="text-muted">Bảo trì: sân vẫn hiển thị nhưng không thể đặt.</small>
                             </div>
 
-                            {{-- 🖼️ HIỂN THỊ ẢNH HIỆN TẠI --}}
-                            @if($arena->image)
+                            {{-- 🖼️ HIỂN THỊ ẢNH HIỆN TẠI VÀ ĐỔI ẢNH --}}
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Ảnh Hiện Tại</label>
-                                <div class="mt-2">
-                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" class="rounded shadow-sm" style="width: 200px; height: 150px; object-fit: cover;">
+                                <label class="form-label fw-semibold">Ảnh Đại Diện Sân (Avt)</label>
+                                @if($arena->image)
+                                <div class="mb-2">
+                                    <img src="{{ Storage::url($arena->image) }}" alt="{{ $arena->name }}" class="rounded shadow-sm" style="width: 150px; height: 100px; object-fit: cover;">
                                 </div>
-                            </div>
-                            @endif
-
-                            {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH MỚI --}}
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Đổi Ảnh Sân</label>
+                                @endif
                                 <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                                <small class="text-muted">Để trống nếu không muốn đổi ảnh. Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
+                                <small class="text-muted">Để trống nếu không muốn đổi ảnh. (tối đa 2MB)</small>
                                 @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ảnh Phụ 1</label>
+                                @if($arena->image_1)
+                                <div class="mb-2">
+                                    <img src="{{ Storage::url($arena->image_1) }}" alt="Ảnh phụ 1" class="rounded shadow-sm" style="width: 100%; height: 100px; object-fit: cover;">
+                                </div>
+                                @endif
+                                <input type="file" name="image_1" class="form-control @error('image_1') is-invalid @enderror" accept="image/*">
+                                @error('image_1') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ảnh Phụ 2</label>
+                                @if($arena->image_2)
+                                <div class="mb-2">
+                                    <img src="{{ Storage::url($arena->image_2) }}" alt="Ảnh phụ 2" class="rounded shadow-sm" style="width: 100%; height: 100px; object-fit: cover;">
+                                </div>
+                                @endif
+                                <input type="file" name="image_2" class="form-control @error('image_2') is-invalid @enderror" accept="image/*">
+                                @error('image_2') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="col-12">

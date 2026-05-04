@@ -64,7 +64,7 @@
                             <div class="pitch-overlay"></div>
                         </div>
                         <div class="pitch-info p-3">
-                            <h3 class="pitch-name h5 mb-2">{{ $arena->name }}</h3>
+                            <h3 class="pitch-name h5 mb-2"><a href="{{ route('arenas.show', $arena) }}" class="text-decoration-none text-dark">{{ $arena->name }}</a></h3>
                             <div class="pitch-location mb-3 text-muted small">
                                 <i class="fas fa-map-marker-alt me-1 text-danger"></i>
                                 <span>{{ Str::limit($arena->location, 50) }}</span>
@@ -75,8 +75,8 @@
                             </div>
                             <div class="row g-2">
                                 <div class="col-6">
-                                    <a href="{{ route('map') }}?id={{ $arena->id }}" class="btn btn-outline-primary btn-sm w-100">
-                                        <i class="fas fa-map-marked-alt me-1"></i>Bản đồ
+                                    <a href="{{ route('arenas.show', $arena) }}" class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="fas fa-info-circle me-1"></i>Chi tiết
                                     </a>
                                 </div>
                                 <div class="col-6">

@@ -61,12 +61,29 @@
 
                             {{-- 🖼️ THÊM PHẦN UPLOAD ẢNH --}}
                             <div class="mb-4">
-                                <label for="image" class="form-label fw-bold">Ảnh Sân</label>
+                                <label for="image" class="form-label fw-bold">Ảnh Đại Diện Sân (Avt)</label>
                                 <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
                                 <small class="text-muted">Hỗ trợ: JPEG, PNG, JPG, GIF (tối đa 2MB)</small>
                                 @error('image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="image_1" class="form-label fw-bold">Ảnh Phụ 1 (Tùy chọn)</label>
+                                    <input type="file" name="image_1" id="image_1" class="form-control @error('image_1') is-invalid @enderror" accept="image/*">
+                                    @error('image_1')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="image_2" class="form-label fw-bold">Ảnh Phụ 2 (Tùy chọn)</label>
+                                    <input type="file" name="image_2" id="image_2" class="form-control @error('image_2') is-invalid @enderror" accept="image/*">
+                                    @error('image_2')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div class="row g-3 mb-4">

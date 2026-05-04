@@ -85,6 +85,18 @@ class ArenaController extends Controller
     }
 
     /**
+     * Display the specified resource for public.
+     */
+    public function show(Arena $arena)
+    {
+        // Only allow viewing active or maintenance arenas
+        if (!in_array($arena->status, ['active', 'maintenance'])) {
+            abort(404);
+        }
+        return view('arenas.show', compact('arena'));
+    }
+
+    /**
      * Display a listing of the resource for admin.
      */
     public function index()
@@ -114,13 +126,17 @@ class ArenaController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_1' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_2' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Xử lý upload ảnh
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
-            $validated['image'] = $file->storeAs('arenas', $filename, 'public');
+        foreach (['image', 'image_1', 'image_2'] as $imgField) {
+            if ($request->hasFile($imgField)) {
+                $file = $request->file($imgField);
+                $filename = time() . '_' . $imgField . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
+                $validated[$imgField] = $file->storeAs('arenas', $filename, 'public');
+            }
         }
 
         Arena::create($validated);
@@ -150,18 +166,22 @@ class ArenaController extends Controller
             'latitude'  => 'required|numeric',
             'longitude' => 'required|numeric',
             'image'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_1'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_2'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Xử lý upload ảnh mới
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($arena->image && Storage::disk('public')->exists($arena->image)) {
-                Storage::disk('public')->delete($arena->image);
+        foreach (['image', 'image_1', 'image_2'] as $imgField) {
+            if ($request->hasFile($imgField)) {
+                // Xóa ảnh cũ nếu có
+                if ($arena->$imgField && Storage::disk('public')->exists($arena->$imgField)) {
+                    Storage::disk('public')->delete($arena->$imgField);
+                }
+                
+                $file = $request->file($imgField);
+                $filename = time() . '_' . $imgField . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
+                $validated[$imgField] = $file->storeAs('arenas', $filename, 'public');
             }
-            
-            $file = $request->file('image');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $file->getClientOriginalName());
-            $validated['image'] = $file->storeAs('arenas', $filename, 'public');
         }
 
         $arena->update($validated);
@@ -175,8 +195,10 @@ class ArenaController extends Controller
     public function destroy(Arena $arena)
     {
         // Xóa ảnh khi xóa sân
-        if ($arena->image && Storage::disk('public')->exists($arena->image)) {
-            Storage::disk('public')->delete($arena->image);
+        foreach (['image', 'image_1', 'image_2'] as $imgField) {
+            if ($arena->$imgField && Storage::disk('public')->exists($arena->$imgField)) {
+                Storage::disk('public')->delete($arena->$imgField);
+            }
         }
         
         $arena->delete();

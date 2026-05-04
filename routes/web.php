@@ -19,6 +19,7 @@ Route::get('/', function () {
 // Bản đồ và Sân bãi
 Route::get('/ban-do', [MapController::class, 'index'])->name('map');
 Route::get('/san-bong', [ArenaController::class, 'publicIndex'])->name('arenas.index');
+Route::get('/san-bong/{arena}', [ArenaController::class, 'show'])->name('arenas.show');
 Route::get('/lich-trong', [ArenaController::class, 'availableIndex'])->name('arenas.available');
 Route::get('/api/arenas', [MapController::class, 'getArenas']);
 
