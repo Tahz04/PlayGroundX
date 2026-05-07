@@ -99,9 +99,28 @@ class ArenaController extends Controller
     /**
      * Display a listing of the resource for admin.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $arenas = Arena::orderBy('created_at', 'desc')->get();
+        $query = Arena::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('location', 'like', "%$search%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $arenas = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
         return view('admin.arenas.index', compact('arenas'));
     }
 

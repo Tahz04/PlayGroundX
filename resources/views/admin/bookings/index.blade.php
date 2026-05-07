@@ -6,17 +6,97 @@
 <div class="container" style="margin-top: 100px; margin-bottom: 50px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold"><i class="fas fa-clipboard-list text-primary me-2"></i>Quản Lý Đơn Đặt Sân</h2>
-            <p class="text-muted">Xem và xử lý các yêu cầu đặt sân từ người dùng</p>
+            <h2 class="fw-bold mb-1"><i class="fas fa-clipboard-list text-primary me-2"></i>Quản Lý Đơn Đặt Sân</h2>
+            <p class="text-muted mb-0">Xem và xử lý các yêu cầu đặt sân từ người dùng</p>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(16,185,129,0.1);">
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(16,185,129,0.15);">
             <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    {{-- Search & Filter Bar --}}
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+        <div class="card-body p-3 p-md-4">
+            <form action="{{ route('admin.bookings.index') }}" method="GET">
+                <div class="row g-2 align-items-end">
+                    {{-- Search --}}
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label small fw-semibold text-muted mb-1">Tìm kiếm</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted" style="font-size:.85rem;"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control border-start-0 ps-0"
+                                   placeholder="Tên khách, email hoặc tên sân..."
+                                   value="{{ request('search') }}" autocomplete="off">
+                        </div>
+                    </div>
+
+                    {{-- Trạng thái --}}
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label small fw-semibold text-muted mb-1">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="">Tất cả</option>
+                            <option value="pending"   {{ request('status') == 'pending'   ? 'selected' : '' }}>Chờ xác nhận</option>
+                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
+                        </select>
+                    </div>
+
+                    {{-- Ngày --}}
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label small fw-semibold text-muted mb-1">Ngày đặt</label>
+                        <input type="date" name="date" class="form-control" value="{{ request('date') }}">
+                    </div>
+
+                    {{-- Buttons --}}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="d-flex gap-2 mt-1">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-filter me-1"></i>Lọc
+                            </button>
+                            @if(request()->hasAny(['search', 'status', 'date']))
+                                <a href="{{ route('admin.bookings.index') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Xóa lọc
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Active filter chips --}}
+                @if(request()->hasAny(['search', 'status', 'date']))
+                    <div class="d-flex align-items-center gap-2 flex-wrap mt-3">
+                        <span class="text-muted small">Đang lọc:</span>
+                        @if(request('search'))
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1">
+                                <i class="fas fa-search me-1"></i>{{ request('search') }}
+                            </span>
+                        @endif
+                        @if(request('status'))
+                            @php
+                                $statusLabels = ['pending'=>'Chờ xác nhận','confirmed'=>'Đã xác nhận','completed'=>'Hoàn thành','cancelled'=>'Đã hủy'];
+                            @endphp
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-1">
+                                <i class="fas fa-circle me-1"></i>{{ $statusLabels[request('status')] ?? request('status') }}
+                            </span>
+                        @endif
+                        @if(request('date'))
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-1">
+                                <i class="far fa-calendar-alt me-1"></i>{{ date('d/m/Y', strtotime(request('date'))) }}
+                            </span>
+                        @endif
+                        <span class="text-muted small ms-1">— {{ $bookings->total() }} kết quả</span>
+                    </div>
+                @endif
+            </form>
+        </div>
+    </div>
 
     <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
         <div class="table-responsive">
@@ -76,7 +156,10 @@
                                         'completed' => 'bg-info text-white'
                                     ][$booking->status] ?? 'bg-secondary text-white';
                                 @endphp
-                                <span class="badge {{ $statusClass }} rounded-pill px-3 py-2 small">{{ $booking->status }}</span>
+                                @php
+                                    $statusLabel = ['pending'=>'Chờ xác nhận','confirmed'=>'Đã xác nhận','cancelled'=>'Đã hủy','completed'=>'Hoàn thành'][$booking->status] ?? $booking->status;
+                                @endphp
+                                <span class="badge {{ $statusClass }} rounded-pill px-3 py-2 small">{{ $statusLabel }}</span>
                             </td>
                             <td class="text-end pe-4">
                                 <form action="{{ route('admin.bookings.update-status', $booking) }}" method="POST" class="d-inline-block">
@@ -95,7 +178,16 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">Chưa có đơn đặt sân nào.</td>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-clipboard-list fa-2x text-muted mb-3 d-block"></i>
+                                <span class="text-muted">
+                                    @if(request()->hasAny(['search','status','date']))
+                                        Không tìm thấy đơn đặt sân phù hợp. <a href="{{ route('admin.bookings.index') }}">Xóa bộ lọc</a>
+                                    @else
+                                        Chưa có đơn đặt sân nào.
+                                    @endif
+                                </span>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -103,8 +195,37 @@
         </div>
     </div>
     
-    <div class="mt-4">
-        {{ $bookings->links() }}
-    </div>
+    @if($bookings->hasPages())
+        <div class="mt-4">{{ $bookings->links() }}</div>
+    @endif
 </div>
+
+<style>
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: .72rem;
+    letter-spacing: .05em;
+    color: #64748b;
+    padding-top: 1.1rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+.table tbody td {
+    padding-top: .9rem;
+    padding-bottom: .9rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+.table-hover tbody tr:hover { background: #f8fafc; }
+.form-select, .form-control {
+    height: 42px;
+    border-color: #e2e8f0;
+    font-size: .9rem;
+}
+.form-select:focus, .form-control:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16,185,129,.12);
+}
+.input-group-text { border-color: #e2e8f0; }
+</style>
 @endsection
