@@ -176,8 +176,11 @@
                     <div class="avail-card-right">
                         <span class="free-badge">...</span>
                         @if($arena->isMaintenance())
-                            <button class="btn btn-sm btn-secondary disabled mt-2" disabled>
-                                <i class="fas fa-tools me-1"></i>Bảo trì
+                            <button class="btn btn-sm btn-warning fw-semibold mt-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#maintenanceModal"
+                                    data-arena-name="{{ $arena->name }}">
+                                <i class="fas fa-wrench me-1"></i>Bảo Trì
                             </button>
                         @else
                             <a href="{{ route('bookings.create', $arena) }}?date={{ $date }}"

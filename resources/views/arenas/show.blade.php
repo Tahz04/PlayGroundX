@@ -69,9 +69,19 @@
                     <div class="card-body p-4 p-xl-5">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <h1 class="h3 fw-bold mb-0 text-dark">{{ $arena->name }}</h1>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 ms-2">
-                                <i class="fas fa-check-circle me-1"></i> Sẵn sàng
-                            </span>
+                            @if($arena->isMaintenance())
+                                <span class="badge bg-warning bg-opacity-15 text-warning border border-warning rounded-pill px-3 py-2 ms-2">
+                                    <i class="fas fa-wrench me-1"></i> Bảo trì
+                                </span>
+                            @elseif($arena->isActive())
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 ms-2">
+                                    <i class="fas fa-check-circle me-1"></i> Sẵn sàng
+                                </span>
+                            @else
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-2 ms-2">
+                                    <i class="fas fa-times-circle me-1"></i> Tạm ngưng
+                                </span>
+                            @endif
                         </div>
 
                         <div class="d-flex gap-2 mb-4">
@@ -100,9 +110,26 @@
 
                         <hr class="my-4 opacity-10">
 
-                        <a href="{{ route('bookings.create', $arena->id) }}" class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm" style="font-size: 1.1rem;">
-                            <i class="far fa-calendar-alt me-2"></i> Đặt Sân Ngay
-                        </a>
+                        @if($arena->isMaintenance())
+                            <button class="btn btn-warning btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm"
+                                    style="font-size: 1.1rem;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#maintenanceModal"
+                                    data-arena-name="{{ $arena->name }}">
+                                <i class="fas fa-wrench me-2"></i> Đang Bảo Trì
+                            </button>
+                            <p class="text-center text-muted small mt-2 mb-0">
+                                <i class="fas fa-info-circle me-1"></i>Sân tạm thời không nhận đặt chỗ. Vui lòng thử lại sau.
+                            </p>
+                        @elseif(!$arena->isActive())
+                            <button class="btn btn-secondary btn-lg w-100 py-3 fw-bold rounded-pill" disabled style="font-size: 1.1rem; opacity: .6;">
+                                <i class="fas fa-times-circle me-2"></i> Tạm Ngưng Hoạt Động
+                            </button>
+                        @else
+                            <a href="{{ route('bookings.create', $arena->id) }}" class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm" style="font-size: 1.1rem;">
+                                <i class="far fa-calendar-alt me-2"></i> Đặt Sân Ngay
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>

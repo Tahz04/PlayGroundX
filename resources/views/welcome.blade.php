@@ -262,8 +262,11 @@
                                 <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
                             </div>
                             @if($arena->isMaintenance())
-                                <button class="btn-book disabled w-100" disabled style="background: var(--clr-dark-300); cursor: not-allowed; opacity: 0.8;">
-                                    <i class="fas fa-tools"></i>
+                                <button class="btn-book btn-book-maintenance w-100"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#maintenanceModal"
+                                        data-arena-name="{{ $arena->name }}">
+                                    <i class="fas fa-wrench"></i>
                                     Đang Bảo Trì
                                 </button>
                             @else
@@ -509,6 +512,18 @@
     </button>
 
     <style>
+        .btn-book-maintenance {
+            background: linear-gradient(135deg, #92400e, #d97706) !important;
+            color: #fef3c7 !important;
+            cursor: pointer !important;
+            opacity: 1 !important;
+            border: none;
+        }
+        .btn-book-maintenance:hover {
+            background: linear-gradient(135deg, #b45309, #f59e0b) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(217,119,6,.4);
+        }
         .promotion-badge {
             display: inline-flex;
             align-items: center;

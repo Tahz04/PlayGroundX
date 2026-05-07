@@ -18,6 +18,11 @@ class BookingController extends Controller
      */
     public function create(Request $request, Arena $arena)
     {
+        if (!$arena->isActive()) {
+            return redirect()->route('arenas.index')
+                ->with('error', 'Sân "' . $arena->name . '" hiện không thể đặt' . ($arena->isMaintenance() ? ' (đang bảo trì).' : '.'));
+        }
+
         $date = $request->input('date', date('Y-m-d'));
         $timeSlots = $this->getStandardOrderedSlots();
 
@@ -104,6 +109,13 @@ class BookingController extends Controller
             'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
         ]);
 
+        $arena = Arena::findOrFail((int) $request->arena_id);
+
+        if (!$arena->isActive()) {
+            return back()->withInput()
+                ->with('error', 'Sân "' . $arena->name . '" hiện không thể đặt' . ($arena->isMaintenance() ? ' (đang bảo trì).' : '.'));
+        }
+
         // Note: start_hour and end_hour are now expected to be strings like "06:00", "06:30"
         $startTimeStr = $request->input('start_hour');
         $endTimeStr = $request->input('end_hour');
@@ -189,8 +201,6 @@ class BookingController extends Controller
                 ->with('error', 'Các khung giờ sau đã có người đặt: ' . $conflictTimes . '. Vui lòng chọn giờ khác.');
         }
 
-        $arena = Arena::findOrFail((int) $request->arena_id);
-        
         // Calculate total price based on duration (Rate per Hour)
         $totalPrice = ($durationMinutes / 60) * $arena->price;
 

@@ -81,8 +81,11 @@
                                 </div>
                                 <div class="col-6">
                                     @if($arena->isMaintenance())
-                                        <button class="btn btn-secondary btn-sm w-100 disabled" disabled>
-                                            <i class="fas fa-tools me-1"></i>Bảo trì
+                                        <button class="btn btn-warning btn-sm w-100 fw-semibold"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#maintenanceModal"
+                                                data-arena-name="{{ $arena->name }}">
+                                            <i class="fas fa-wrench me-1"></i>Bảo Trì
                                         </button>
                                     @else
                                         <a href="{{ route('bookings.create', $arena) }}" class="btn btn-primary btn-sm w-100 fw-bold">Đặt Sân</a>

@@ -205,6 +205,179 @@
         </div>
     </nav>
 
+    <!-- ===== MAINTENANCE MODAL (global) ===== -->
+    <div class="modal fade" id="maintenanceModal" tabindex="-1" aria-labelledby="maintenanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content mtn-modal">
+                <!-- Header stripes -->
+                <div class="mtn-stripe"></div>
+
+                <div class="modal-body text-center px-4 pt-4 pb-2">
+                    <!-- Animated icon -->
+                    <div class="mtn-icon-wrap">
+                        <div class="mtn-icon-ring"></div>
+                        <div class="mtn-icon-ring mtn-ring-2"></div>
+                        <div class="mtn-icon">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                    </div>
+
+                    <h4 class="mtn-title mt-4 mb-2">Sân đang bảo trì</h4>
+                    <p class="mtn-arena-name mb-1" id="maintenanceArenaName"></p>
+                    <p class="mtn-desc">Sân này đang được bảo trì và tạm thời không nhận đặt sân.<br>Vui lòng thử lại sau hoặc chọn một sân khác.</p>
+
+                    <!-- Status bar -->
+                    <div class="mtn-status-bar">
+                        <span class="mtn-status-dot"></span>
+                        <span>Dự kiến hoạt động trở lại sớm</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-center border-0 pb-4 gap-2">
+                    <button type="button" class="btn mtn-btn-close" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Đóng
+                    </button>
+                    <a href="{{ route('arenas.index') }}" class="btn mtn-btn-other">
+                        <i class="fas fa-search me-1"></i>Xem sân khác
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .mtn-modal {
+        background: #0f172a;
+        border: 1px solid rgba(251,191,36,.2);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(251,191,36,.1);
+    }
+    .mtn-stripe {
+        height: 4px;
+        background: repeating-linear-gradient(
+            90deg,
+            #f59e0b 0, #f59e0b 12px,
+            #1e293b 12px, #1e293b 20px
+        );
+    }
+    .mtn-icon-wrap {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mtn-icon-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid rgba(251,191,36,.3);
+        animation: mtn-ring-pulse 2s ease-out infinite;
+    }
+    .mtn-ring-2 {
+        animation-delay: .7s;
+        border-color: rgba(251,191,36,.15);
+    }
+    @keyframes mtn-ring-pulse {
+        0%   { transform: scale(1);   opacity: 1; }
+        100% { transform: scale(1.8); opacity: 0; }
+    }
+    .mtn-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #92400e, #d97706);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: #fef3c7;
+        box-shadow: 0 8px 24px rgba(217,119,6,.4);
+        animation: mtn-wrench-shake 2.4s ease-in-out infinite;
+    }
+    @keyframes mtn-wrench-shake {
+        0%,100% { transform: rotate(-10deg); }
+        50%     { transform: rotate(10deg); }
+    }
+    .mtn-title {
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    .mtn-arena-name {
+        color: #fbbf24;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+    .mtn-desc {
+        color: rgba(255,255,255,.55);
+        font-size: .875rem;
+        line-height: 1.6;
+    }
+    .mtn-status-bar {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        background: rgba(251,191,36,.08);
+        border: 1px solid rgba(251,191,36,.2);
+        border-radius: 20px;
+        padding: .4rem 1rem;
+        font-size: .78rem;
+        color: #fbbf24;
+        font-weight: 500;
+        margin-top: .5rem;
+    }
+    .mtn-status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f59e0b;
+        animation: mtn-dot-blink 1.2s ease-in-out infinite;
+        flex-shrink: 0;
+    }
+    @keyframes mtn-dot-blink {
+        0%,100% { opacity: 1; }
+        50%     { opacity: .3; }
+    }
+    .mtn-btn-close {
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.12);
+        color: rgba(255,255,255,.7);
+        border-radius: 10px;
+        font-size: .875rem;
+        padding: .5rem 1.25rem;
+        transition: all .2s;
+    }
+    .mtn-btn-close:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .mtn-btn-other {
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+        color: #1a1a1a !important;
+        border: none;
+        border-radius: 10px;
+        font-size: .875rem;
+        font-weight: 700;
+        padding: .5rem 1.25rem;
+        transition: all .2s;
+    }
+    .mtn-btn-other:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(217,119,6,.4); }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById('maintenanceModal');
+        if (modal) {
+            modal.addEventListener('show.bs.modal', function (e) {
+                var btn = e.relatedTarget;
+                var name = btn ? btn.getAttribute('data-arena-name') : '';
+                document.getElementById('maintenanceArenaName').textContent = name ? '"' + name + '"' : '';
+            });
+        }
+    });
+    </script>
+
     <!-- Main Content -->
     <main>
         <!-- Toast Notification -->
