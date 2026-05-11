@@ -42,21 +42,19 @@
                                     <div class="fw-semibold">
                                         @php
                                             $durationHours = 0;
-                                            $hasNewFormat = isset($firstBooking->start_time, $lastBooking->end_time) && 
-                                                           !is_null($firstBooking->start_time) && 
+                                            $lastBooking = $bookings->last();
+                                            $hasNewFormat = !is_null($firstBooking->start_time) && 
                                                            !is_null($lastBooking->end_time) && 
-                                                           $firstBooking->start_time !== '' && 
-                                                           $lastBooking->end_time !== '';
+                                                           trim($firstBooking->start_time) !== '' && 
+                                                           trim($lastBooking->end_time) !== '';
                                             
                                             if ($hasNewFormat) {
                                                 try {
-                                                    $startMinutes = (int) \Carbon\Carbon::createFromFormat('H:i:s', $firstBooking->start_time)->format('H') * 60 + 
-                                                                    (int) \Carbon\Carbon::createFromFormat('H:i:s', $firstBooking->start_time)->format('i');
-                                                    $endMinutes = (int) \Carbon\Carbon::createFromFormat('H:i:s', $lastBooking->end_time)->format('H') * 60 + 
-                                                                  (int) \Carbon\Carbon::createFromFormat('H:i:s', $lastBooking->end_time)->format('i');
-                                                    $durationHours = ($endMinutes - $startMinutes) / 60;
+                                                    $startTime = \Carbon\Carbon::createFromFormat('H:i:s', trim($firstBooking->start_time));
+                                                    $endTime = \Carbon\Carbon::createFromFormat('H:i:s', trim($lastBooking->end_time));
+                                                    $durationHours = $startTime->diffInMinutes($endTime) / 60;
                                                 } catch (\Exception $e) {
-                                                    $durationHours = 0;
+                                                    $durationHours = ($bookings->count() * 30) / 60;
                                                 }
                                             } else {
                                                 $durationHours = ($bookings->count() * 30) / 60;
