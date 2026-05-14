@@ -19,6 +19,7 @@ class Arena extends Model
         'latitude',
         'longitude',
         'status',
+        'maintenance_note',
         'image',
         'image_1',
         'image_2',

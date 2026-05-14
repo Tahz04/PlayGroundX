@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Arena;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -111,6 +112,30 @@ class OwnerBookingController extends Controller
         }
 
         return back()->with('success', 'Đã hủy đơn đặt sân.');
+    }
+
+    /** Bắt đầu bộ đếm thời gian cho một booking */
+    public function startTimer(Booking $booking): JsonResponse
+    {
+        $arenaIds = Auth::user()->arenas()->pluck('id');
+        if (!$arenaIds->contains($booking->arena_id)) {
+            return response()->json(['error' => 'Bạn không có quyền thao tác trên đơn này.'], 403);
+        }
+
+        if (!in_array($booking->status, ['confirmed', 'paid'])) {
+            return response()->json(['error' => 'Chỉ có thể bắt đầu timer cho đơn đã xác nhận.'], 422);
+        }
+
+        if ($booking->date !== now()->toDateString()) {
+            return response()->json(['error' => 'Chỉ có thể bắt đầu timer cho đơn hôm nay.'], 422);
+        }
+
+        $booking->update(['timer_started_at' => now()]);
+
+        return response()->json([
+            'timer_started_at'  => $booking->timer_started_at->toIso8601String(),
+            'end_time_datetime' => $booking->date . 'T' . $booking->end_time,
+        ]);
     }
 
     /**

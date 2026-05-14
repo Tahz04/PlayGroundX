@@ -14,6 +14,8 @@ class OwnerRequest extends Model
         'user_id',
         'status',
         'message',
+        'image_1',
+        'image_2',
     ];
 
     public function user(): BelongsTo

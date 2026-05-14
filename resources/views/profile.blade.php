@@ -79,15 +79,54 @@
                 @if($canRequestOwner)
                     <div class="card border-0 rounded-4 shadow-sm mb-4 bg-white">
                         <div class="card-body p-4">
-                            <h5 class="mb-4">Trở thành chủ sân</h5>
-                            <p class="text-muted">Gửi yêu cầu để chúng tôi xem xét và mở quyền quản lý sân cho bạn.</p>
-                            <form action="{{ route('owner-requests.store') }}" method="POST">
+                            <h5 class="mb-2">Trở thành chủ sân</h5>
+                            <p class="text-muted mb-4">Gửi yêu cầu kèm giấy tờ tùy thân để chúng tôi xác minh và mở quyền quản lý sân cho bạn.</p>
+
+                            @if(session('success'))
+                                <div class="alert alert-success rounded-3 mb-3">{{ session('success') }}</div>
+                            @endif
+                            @if(session('error'))
+                                <div class="alert alert-danger rounded-3 mb-3">{{ session('error') }}</div>
+                            @endif
+
+                            <form action="{{ route('owner-requests.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="message" class="form-label">Lời nhắn tới quản trị viên (tùy chọn)</label>
-                                    <textarea name="message" id="message" class="form-control" rows="4">{{ old('message') }}</textarea>
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-id-card text-primary me-1"></i>
+                                        Ảnh giấy tờ mặt trước <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="file" name="image_1"
+                                           class="form-control @error('image_1') is-invalid @enderror"
+                                           accept=".jpg,.jpeg,.png,.pdf" required>
+                                    <div class="form-text">CMND/CCCD/Hộ chiếu mặt trước. JPG, PNG hoặc PDF, tối đa 2MB.</div>
+                                    @error('image_1')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
-                                <button type="submit" class="btn btn-hero-primary">Trở thành chủ sân ngay bây giờ!</button>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-id-card-alt text-primary me-1"></i>
+                                        Ảnh giấy tờ mặt sau <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="file" name="image_2"
+                                           class="form-control @error('image_2') is-invalid @enderror"
+                                           accept=".jpg,.jpeg,.png,.pdf" required>
+                                    <div class="form-text">CMND/CCCD/Hộ chiếu mặt sau. JPG, PNG hoặc PDF, tối đa 2MB.</div>
+                                    @error('image_2')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="message" class="form-label">Lời nhắn tới quản trị viên <span class="text-muted">(tùy chọn)</span></label>
+                                    <textarea name="message" id="message" class="form-control" rows="3"
+                                              placeholder="Thông tin thêm về sân bạn muốn quản lý...">{{ old('message') }}</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-hero-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
+                                </button>
                             </form>
                         </div>
                     </div>

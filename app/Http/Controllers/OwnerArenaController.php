@@ -131,6 +131,34 @@ class OwnerArenaController extends Controller
     }
 
     /**
+     * Toggle arena status between active and maintenance.
+     */
+    public function toggleMaintenance(Request $request, Arena $arena)
+    {
+        $this->authorizeOwner($arena);
+
+        $request->validate([
+            'maintenance_note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if ($arena->status === Arena::STATUS_MAINTENANCE) {
+            $arena->update([
+                'status'           => Arena::STATUS_ACTIVE,
+                'maintenance_note' => null,
+            ]);
+            $message = 'Sân đã được kích hoạt trở lại.';
+        } else {
+            $arena->update([
+                'status'           => Arena::STATUS_MAINTENANCE,
+                'maintenance_note' => $request->maintenance_note,
+            ]);
+            $message = 'Sân đã được đặt vào trạng thái bảo trì.';
+        }
+
+        return back()->with('success', $message);
+    }
+
+    /**
      * Verify that the authenticated user owns the arena.
      */
     private function authorizeOwner(Arena $arena)

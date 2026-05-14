@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\OwnerBookingController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/become-owner', [OwnerRequestController::class, 'requestOwner'])->name('owner-requests.store');
     Route::patch('/profile/password', [OwnerRequestController::class, 'changePassword'])->name('profile.password');
 
+    // Thương lượng giá (Customer gửi)
+    Route::post('/san-bong/{arena}/thuong-luong', [NegotiationController::class, 'store'])->name('negotiations.store');
+
     // Test debug route
     Route::get('/test-auth', function () {
         $user = \Illuminate\Support\Facades\Auth::user();
@@ -71,10 +75,18 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:owner'])->prefix('owner')->name('owner.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\OwnerDashboardController::class, 'index'])->name('dashboard');
         Route::resource('arenas', \App\Http\Controllers\OwnerArenaController::class);
+        Route::patch('/arenas/{arena}/toggle-maintenance', [\App\Http\Controllers\OwnerArenaController::class, 'toggleMaintenance'])->name('arenas.toggle-maintenance');
+
         Route::get('/bookings', [\App\Http\Controllers\OwnerBookingController::class, 'index'])->name('bookings.index');
         Route::patch('/bookings/{booking}/confirm', [\App\Http\Controllers\OwnerBookingController::class, 'confirm'])->name('bookings.confirm');
         Route::patch('/bookings/{booking}/cancel', [\App\Http\Controllers\OwnerBookingController::class, 'cancel'])->name('bookings.cancel');
         Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\OwnerBookingController::class, 'updateStatus'])->name('bookings.update-status');
+        Route::post('/bookings/{booking}/start-timer', [\App\Http\Controllers\OwnerBookingController::class, 'startTimer'])->name('bookings.start-timer');
+
+        // Thương lượng giá
+        Route::get('/negotiations', [NegotiationController::class, 'index'])->name('negotiations.index');
+        Route::patch('/negotiations/{negotiation}/accept', [NegotiationController::class, 'accept'])->name('negotiations.accept');
+        Route::patch('/negotiations/{negotiation}/reject', [NegotiationController::class, 'reject'])->name('negotiations.reject');
     });
 
     // Notifications
@@ -90,6 +102,7 @@ Route::middleware('auth')->group(function () {
             // Quản lý đơn đặt sân
             Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
             Route::patch('/bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
+            Route::post('/bookings/{booking}/start-timer', [AdminBookingController::class, 'startTimer'])->name('bookings.start-timer');
 
             // Quản lý yêu cầu trở thành chủ sân
             Route::get('/owner-requests', [AdminController::class, 'index'])->name('owner-requests.index');

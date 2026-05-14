@@ -95,16 +95,22 @@
                                 <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px; max-height: 400px; overflow-y: auto;">
                                     <li><h6 class="dropdown-header fw-bold">Thông báo mới</h6></li>
                                     @forelse(Auth::user()->unreadNotifications as $notification)
+                                        @php
+                                            $nAction = $notification->data['action'] ?? '';
+                                            $nIcon   = match($nAction) {
+                                                'created', 'approved' => ['bg-success bg-opacity-10 text-success', 'fa-check'],
+                                                'submitted'           => ['bg-primary bg-opacity-10 text-primary', 'fa-user-tie'],
+                                                default               => ['bg-danger bg-opacity-10 text-danger', 'fa-times'],
+                                            };
+                                        @endphp
                                         <li>
                                             <a class="dropdown-item py-2 border-bottom" href="{{ $notification->data['url'] ?? '#' }}">
                                                 <div class="d-flex align-items-start gap-2">
-                                                    @if($notification->data['action'] === 'created')
-                                                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2"><i class="fas fa-check"></i></div>
-                                                    @else
-                                                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-2"><i class="fas fa-times"></i></div>
-                                                    @endif
+                                                    <div class="{{ $nIcon[0] }} rounded-circle p-2 flex-shrink-0">
+                                                        <i class="fas {{ $nIcon[1] }}"></i>
+                                                    </div>
                                                     <div>
-                                                        <p class="mb-0 text-wrap fw-semibold fs-6" style="font-size: 0.85rem !important;">{{ $notification->data['message'] }}</p>
+                                                        <p class="mb-0 text-wrap fw-semibold" style="font-size: 0.82rem;">{!! $notification->data['message'] !!}</p>
                                                         <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                                                     </div>
                                                 </div>

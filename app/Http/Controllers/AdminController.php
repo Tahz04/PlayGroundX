@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OwnerRequest;
 use App\Models\Role;
+use App\Notifications\OwnerRequestNotification;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -26,11 +27,17 @@ class AdminController extends Controller
         DB::transaction(function () use ($ownerRequest, $ownerRoleId) {
             $ownerRequest->user->update([
                 'role_id' => $ownerRoleId,
-                'status' => 'active',
+                'status'  => 'active',
             ]);
-
             $ownerRequest->update(['status' => 'approved']);
         });
+
+        // Thông báo in-app cho người dùng
+        $ownerRequest->user->notify(new OwnerRequestNotification(
+            $ownerRequest,
+            'approved',
+            'Chúc mừng! Yêu cầu trở thành chủ sân của bạn đã được <strong>chấp thuận</strong>. Bạn có thể thêm và quản lý sân ngay bây giờ.'
+        ));
 
         return back()->with('success', 'Yêu cầu đã được duyệt.');
     }
@@ -45,6 +52,13 @@ class AdminController extends Controller
             $ownerRequest->user->update(['status' => 'active']);
             $ownerRequest->update(['status' => 'rejected']);
         });
+
+        // Thông báo in-app cho người dùng
+        $ownerRequest->user->notify(new OwnerRequestNotification(
+            $ownerRequest,
+            'rejected',
+            'Yêu cầu trở thành chủ sân của bạn đã bị <strong>từ chối</strong>. Vui lòng liên hệ quản trị viên để biết thêm thông tin.'
+        ));
 
         return back()->with('success', 'Yêu cầu đã bị từ chối.');
     }

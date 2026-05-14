@@ -129,6 +129,51 @@
                             <a href="{{ route('bookings.create', $arena->id) }}" class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm" style="font-size: 1.1rem;">
                                 <i class="far fa-calendar-alt me-2"></i> Đặt Sân Ngay
                             </a>
+
+                            {{-- Thương lượng giá — chỉ hiện cho customer đã đăng nhập --}}
+                            @auth
+                                @if(Auth::user()->role?->name === 'customer')
+                                    <div class="mt-3">
+                                        <button class="btn btn-outline-secondary w-100 rounded-pill" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#negotiationForm"
+                                                aria-expanded="false">
+                                            <i class="fas fa-handshake me-2"></i> Đề xuất giá khác
+                                        </button>
+                                        <div class="collapse mt-3" id="negotiationForm">
+                                            <div class="card border-0 bg-light rounded-4 p-3">
+                                                @if(session('success'))
+                                                    <div class="alert alert-success py-2 rounded-3 mb-3">{{ session('success') }}</div>
+                                                @endif
+                                                <form action="{{ route('negotiations.store', $arena) }}" method="POST">
+                                                    @csrf
+                                                    <div class="mb-2">
+                                                        <label class="form-label small fw-semibold">Giá đề xuất (VNĐ/giờ)</label>
+                                                        <input type="number" name="proposed_price"
+                                                               class="form-control @error('proposed_price') is-invalid @enderror"
+                                                               min="1000" step="1000"
+                                                               placeholder="VD: {{ number_format($arena->price * 0.9, 0, ',', '') }}"
+                                                               value="{{ old('proposed_price') }}" required>
+                                                        <div class="form-text">Giá hiện tại: <strong>{{ number_format($arena->price) }}đ/giờ</strong></div>
+                                                        @error('proposed_price')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Lời nhắn <span class="text-muted">(tùy chọn)</span></label>
+                                                        <textarea name="message"
+                                                                  class="form-control"
+                                                                  rows="2"
+                                                                  placeholder="Lý do đề xuất giá...">{{ old('message') }}</textarea>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                                                        <i class="fas fa-paper-plane me-2"></i> Gửi đề xuất
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endauth
                         @endif
                     </div>
                 </div>
