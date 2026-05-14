@@ -9,12 +9,22 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\OwnerBookingController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Trang chủ
 Route::get('/', function () {
-    $arenas = \App\Models\Arena::whereIn('status', ['active', 'maintenance'])->take(6)->get();
-    return view('welcome', compact('arenas'));
+    $arenas = \App\Models\Arena::whereIn('status', ['active', 'maintenance'])
+        ->withAvg('reviews', 'rating')
+        ->withCount('reviews')
+        ->take(6)
+        ->get();
+    $reviews = \App\Models\Review::with(['user', 'arena'])
+        ->where('rating', '>=', 4)
+        ->latest()
+        ->take(6)
+        ->get();
+    return view('welcome', compact('arenas', 'reviews'));
 })->name('home');
 
 // Bản đồ và Sân bãi
@@ -58,6 +68,10 @@ Route::middleware('auth')->group(function () {
     // Thương lượng giá (Customer gửi)
     Route::post('/san-bong/{arena}/thuong-luong', [NegotiationController::class, 'store'])->name('negotiations.store');
 
+    // Đánh giá sân
+    Route::post('/san-bong/{arena}/danh-gia', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::delete('/danh-gia/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
     // Test debug route
     Route::get('/test-auth', function () {
         $user = \Illuminate\Support\Facades\Auth::user();
@@ -81,8 +95,6 @@ Route::middleware('auth')->group(function () {
         Route::patch('/bookings/{booking}/confirm', [\App\Http\Controllers\OwnerBookingController::class, 'confirm'])->name('bookings.confirm');
         Route::patch('/bookings/{booking}/cancel', [\App\Http\Controllers\OwnerBookingController::class, 'cancel'])->name('bookings.cancel');
         Route::patch('/bookings/{booking}/status', [\App\Http\Controllers\OwnerBookingController::class, 'updateStatus'])->name('bookings.update-status');
-        Route::post('/bookings/{booking}/start-timer', [\App\Http\Controllers\OwnerBookingController::class, 'startTimer'])->name('bookings.start-timer');
-
         // Thương lượng giá
         Route::get('/negotiations', [NegotiationController::class, 'index'])->name('negotiations.index');
         Route::patch('/negotiations/{negotiation}/accept', [NegotiationController::class, 'accept'])->name('negotiations.accept');
@@ -102,7 +114,6 @@ Route::middleware('auth')->group(function () {
             // Quản lý đơn đặt sân
             Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
             Route::patch('/bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
-            Route::post('/bookings/{booking}/start-timer', [AdminBookingController::class, 'startTimer'])->name('bookings.start-timer');
 
             // Quản lý yêu cầu trở thành chủ sân
             Route::get('/owner-requests', [AdminController::class, 'index'])->name('owner-requests.index');

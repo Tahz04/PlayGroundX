@@ -34,20 +34,22 @@ class BookingController extends Controller
 
         $bookedSlotIds = $bookings->whereNotNull('time_slot_id')->pluck('time_slot_id')->toArray();
         
-        $bookedRanges = $bookings->map(function($booking) {
-            if (!empty($booking->start_time) && !empty($booking->end_time) && $booking->start_time && $booking->end_time) {
+        $bookedRanges = $bookings->map(function ($booking) {
+            if ($booking->start_time && $booking->end_time) {
+                $end = substr($booking->end_time, 0, 5);
                 return [
-                    'start' => $booking->start_time,
-                    'end' => $booking->end_time
+                    'start' => substr($booking->start_time, 0, 5),
+                    'end'   => $end === '00:00' ? '24:00' : $end,
                 ];
             } elseif ($booking->timeSlot) {
+                $end = $booking->timeSlot->end_time === '00:00:00' ? '24:00' : substr($booking->timeSlot->end_time, 0, 5);
                 return [
-                    'start' => $booking->timeSlot->start_time,
-                    'end' => $booking->timeSlot->end_time
+                    'start' => substr($booking->timeSlot->start_time, 0, 5),
+                    'end'   => $end,
                 ];
             }
             return null;
-        })->filter()->values();
+        })->filter()->values()->toArray();
 
         return view('bookings.create', compact('arena', 'timeSlots', 'bookedSlotIds', 'bookedRanges', 'date'));
     }
@@ -65,19 +67,19 @@ class BookingController extends Controller
             ->get();
 
         $bookedRanges = [];
-        
+
         foreach ($bookings as $booking) {
-            if (!empty($booking->start_time) && !empty($booking->end_time) && $booking->start_time && $booking->end_time) {
-                // New booking format with start_time and end_time
+            if ($booking->start_time && $booking->end_time) {
+                $end = substr($booking->end_time, 0, 5);
                 $bookedRanges[] = [
-                    'start' => $booking->start_time,
-                    'end' => $booking->end_time
+                    'start' => substr($booking->start_time, 0, 5),
+                    'end'   => $end === '00:00' ? '24:00' : $end,
                 ];
             } elseif ($booking->time_slot_id && $booking->timeSlot) {
-                // Old booking format with time_slot_id
+                $end = $booking->timeSlot->end_time === '00:00:00' ? '24:00' : substr($booking->timeSlot->end_time, 0, 5);
                 $bookedRanges[] = [
-                    'start' => $booking->timeSlot->start_time,
-                    'end' => $booking->timeSlot->end_time
+                    'start' => substr($booking->timeSlot->start_time, 0, 5),
+                    'end'   => $end,
                 ];
             }
         }
@@ -163,7 +165,7 @@ class BookingController extends Controller
         // Check if any selected slot is already booked.
         $conflictingBookings = Booking::where('arena_id', $request->arena_id)
             ->where('date', $request->date)
-            ->where('status', '!=', 'cancelled')
+            ->whereIn('status', ['pending', 'confirmed', 'paid'])
             ->get()
             ->filter(function ($booking) use ($startMinutes, $endMinutes, $startTimeStr, $endTimeStr) {
                 // Determine booking start and end times
@@ -475,8 +477,12 @@ class BookingController extends Controller
             ->orderBy('start_time', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        $reviewedArenaIds = \App\Models\Review::where('user_id', Auth::id())
+            ->pluck('arena_id')
+            ->all();
             
-        return view('bookings.my-bookings', compact('bookings'));
+        return view('bookings.my-bookings', compact('bookings', 'reviewedArenaIds'));
     }
 
     /**

@@ -71,7 +71,14 @@
                             </div>
                             <div class="pitch-meta d-flex justify-content-between align-items-center mb-3">
                                 <div class="pitch-price text-primary fw-bold" style="font-size: 1.1rem;">{{ number_format($arena->price) }}đ <span class="text-muted small fw-normal">/ h</span></div>
-                                <div class="pitch-rating small"><i class="fas fa-star text-warning me-1"></i>4.9</div>
+                                <div class="pitch-rating small">
+                                    @if($arena->reviewsCount() > 0)
+                                        <i class="fas fa-star text-warning me-1"></i>{{ $arena->averageRating() }}
+                                        <span class="text-muted">({{ $arena->reviewsCount() }})</span>
+                                    @else
+                                        <span class="text-muted">Chưa có đánh giá</span>
+                                    @endif
+                                </div>
                             </div>
                             <div class="row g-2">
                                 <div class="col-6">

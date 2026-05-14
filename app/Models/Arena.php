@@ -30,6 +30,23 @@ class Arena extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function averageRating(): ?float
+    {
+        $rating = $this->reviews_avg_rating ?? $this->reviews()->avg('rating');
+
+        return $rating === null ? null : round($rating, 1);
+    }
+
+    public function reviewsCount(): int
+    {
+        return $this->reviews_count ?? $this->reviews()->count();
+    }
+
     public function isMaintenance()
     {
         return $this->status === self::STATUS_MAINTENANCE;

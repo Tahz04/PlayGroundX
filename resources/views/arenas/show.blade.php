@@ -110,6 +110,31 @@
 
                         <hr class="my-4 opacity-10">
 
+                        {{-- ===== LỊCH TRỐNG MINI ===== --}}
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0"><i class="fas fa-calendar-check text-primary me-2"></i>Lịch trống</h6>
+                                <input type="date" id="avail-date-picker"
+                                       class="form-control form-control-sm"
+                                       style="max-width:145px; border-radius:10px;"
+                                       value="{{ date('Y-m-d') }}"
+                                       min="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="p-2 rounded-3" style="background:#f8fafc;border:1.5px solid #e2e8f0;">
+                                <div class="d-flex gap-3 mb-2">
+                                    <span class="d-flex align-items-center gap-1" style="font-size:11px;">
+                                        <span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border:1px solid #86efac;border-radius:2px;"></span>Còn trống
+                                    </span>
+                                    <span class="d-flex align-items-center gap-1" style="font-size:11px;">
+                                        <span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:2px;"></span>Đã đặt
+                                    </span>
+                                </div>
+                                <div id="show-time-grid" class="d-flex flex-wrap gap-1"></div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 opacity-10">
+
                         @if($arena->isMaintenance())
                             <button class="btn btn-warning btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm"
                                     style="font-size: 1.1rem;"
@@ -205,4 +230,239 @@
             .openPopup();
     });
 </script>
+
+{{-- ===== AVAILABILITY GRID SCRIPT ===== --}}
+<script>
+(function () {
+    const arenaId   = {{ $arena->id }};
+    const bookedUrl = '/api/booked-slots/' + arenaId;
+    let   bookedRanges = @json($todayBookedRanges);
+
+    const toMin = t => { if (!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+    const hasConflict = (s, e) => bookedRanges.some(r => {
+        const rs = toMin(r.start), re = toMin(r.end === '00:00' ? '24:00' : r.end);
+        return !(toMin(e) <= rs || toMin(s) >= re);
+    });
+
+    const buildGrid = () => {
+        const grid = document.getElementById('show-time-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        for (let hour = 6; hour < 24; hour++) {
+            for (let min = 0; min < 60; min += 30) {
+                const sH = String(hour).padStart(2, '0'), sM = String(min).padStart(2, '0');
+                const eTotal = hour * 60 + min + 30;
+                const eH = String(Math.floor(eTotal / 60)).padStart(2, '0'), eM = String(eTotal % 60).padStart(2, '0');
+                const start = `${sH}:${sM}`, end = eTotal >= 1440 ? '24:00' : `${eH}:${eM}`;
+                const booked = hasConflict(start, end);
+                const cell = document.createElement('div');
+                cell.style.cssText = [
+                    'padding:2px 6px', 'border-radius:5px', 'font-size:10px', 'font-weight:700', 'line-height:1.7',
+                    `background:${booked ? '#fee2e2' : '#dcfce7'}`,
+                    `color:${booked ? '#991b1b' : '#166534'}`,
+                    `border:1px solid ${booked ? '#fca5a5' : '#86efac'}`,
+                    booked ? 'text-decoration:line-through;opacity:.8' : '',
+                ].join(';');
+                cell.title = `${start}–${end}: ${booked ? 'Đã có người đặt' : 'Còn trống'}`;
+                cell.textContent = start;
+                grid.appendChild(cell);
+            }
+        }
+    };
+
+    buildGrid();
+
+    const picker = document.getElementById('avail-date-picker');
+    if (picker) {
+        picker.addEventListener('change', function () {
+            fetch(`${bookedUrl}?date=${this.value}`)
+                .then(r => r.json())
+                .then(data => {
+                    bookedRanges = data.bookedRanges || [];
+                    buildGrid();
+                });
+        });
+    }
+})();
+</script>
+
+{{-- ==================== ĐÁNH GIÁ SÂN ==================== --}}
+<section id="reviews" class="py-5" style="background: #f8fafc;">
+    <div class="container">
+        {{-- Header --}}
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="fas fa-star text-warning me-2"></i>Đánh Giá Sân</h3>
+                @if($avgRating)
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex text-warning" style="font-size:1.1rem;">
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= floor($avgRating))
+                                    <i class="fas fa-star"></i>
+                                @elseif($i - $avgRating < 1)
+                                    <i class="fas fa-star-half-alt"></i>
+                                @else
+                                    <i class="far fa-star"></i>
+                                @endif
+                            @endfor
+                        </div>
+                        <span class="fw-bold fs-5">{{ $avgRating }}</span>
+                        <span class="text-muted small">({{ $ratingCount }} đánh giá)</span>
+                    </div>
+                @else
+                    <span class="text-muted small">Chưa có đánh giá nào</span>
+                @endif
+            </div>
+        </div>
+
+        {{-- Flash messages --}}
+        @if(session('review_success'))
+            <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4">
+                <i class="fas fa-check-circle me-2"></i>{{ session('review_success') }}
+            </div>
+        @endif
+        @if(session('review_error'))
+            <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i>{{ session('review_error') }}
+            </div>
+        @endif
+
+        <div class="row g-4">
+            {{-- Form đánh giá --}}
+            <div class="col-lg-4">
+                @auth
+                    @if($canReview)
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                            <h5 class="fw-bold mb-3">Viết đánh giá của bạn</h5>
+                            <form action="{{ route('reviews.store', $arena) }}" method="POST">
+                                @csrf
+                                {{-- Star rating --}}
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Số sao <span class="text-danger">*</span></label>
+                                    <div class="star-rating d-flex gap-1" style="font-size:1.6rem; cursor:pointer;">
+                                        @for($s = 1; $s <= 5; $s++)
+                                            <label class="star-label text-muted" data-value="{{ $s }}" title="{{ $s }} sao">
+                                                <i class="far fa-star"></i>
+                                            </label>
+                                        @endfor
+                                    </div>
+                                    <input type="hidden" name="rating" id="ratingInput" value="{{ old('rating', 0) }}">
+                                    @error('rating')
+                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                {{-- Comment --}}
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Nhận xét <span class="text-danger">*</span></label>
+                                    <textarea name="comment" class="form-control rounded-3 @error('comment') is-invalid @enderror"
+                                              rows="4" placeholder="Chia sẻ trải nghiệm của bạn tại sân này...">{{ old('comment') }}</textarea>
+                                    @error('comment')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+                                </button>
+                            </form>
+                        </div>
+                    @elseif($alreadyReviewed)
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <p class="text-muted mb-0">Bạn đã đánh giá sân này rồi.</p>
+                        </div>
+                    @else
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                            <i class="fas fa-lock fa-2x text-muted mb-2 opacity-50"></i>
+                            <p class="text-muted mb-0 small">Chỉ khách hàng đã hoàn thành buổi chơi mới có thể đánh giá sân.</p>
+                        </div>
+                    @endif
+                @else
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                        <i class="fas fa-user fa-2x text-muted mb-2 opacity-50"></i>
+                        <p class="text-muted mb-2 small">Đăng nhập để viết đánh giá</p>
+                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4">Đăng nhập</a>
+                    </div>
+                @endauth
+            </div>
+
+            {{-- Danh sách đánh giá --}}
+            <div class="col-lg-8">
+                @forelse($reviews as $review)
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                                     style="width:42px;height:42px;background:linear-gradient(135deg,#10b981,#059669);font-size:.9rem;flex-shrink:0;">
+                                    {{ mb_strtoupper(mb_substr($review->user->name, 0, 2)) }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ $review->user->name }}</div>
+                                    <div class="d-flex text-warning" style="font-size:.85rem;">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star"></i>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
+                                @auth
+                                    @if(Auth::id() === $review->user_id || Auth::user()->isAdmin())
+                                        <form action="{{ route('reviews.destroy', $review) }}" method="POST"
+                                              onsubmit="return confirm('Xóa đánh giá này?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-sm btn-link text-danger p-0" title="Xóa">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endauth
+                            </div>
+                        </div>
+                        <p class="text-muted mb-0" style="line-height:1.6;">{{ $review->comment }}</p>
+                    </div>
+                @empty
+                    <div class="text-center py-5">
+                        <i class="fas fa-comment-slash fa-3x text-muted mb-3 opacity-25"></i>
+                        <p class="text-muted">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</section>
+
+@push('scripts')
+<script>
+(function () {
+    const labels = document.querySelectorAll('.star-label');
+    const input  = document.getElementById('ratingInput');
+    if (!labels.length) return;
+
+    function render(val) {
+        labels.forEach(function (lbl, idx) {
+            const icon = lbl.querySelector('i');
+            if (idx < val) {
+                icon.className = 'fas fa-star text-warning';
+            } else {
+                icon.className = 'far fa-star text-muted';
+            }
+        });
+    }
+
+    // Khởi tạo nếu có old value
+    if (parseInt(input.value) > 0) render(parseInt(input.value));
+
+    labels.forEach(function (lbl) {
+        lbl.addEventListener('mouseenter', function () { render(parseInt(lbl.dataset.value)); });
+        lbl.addEventListener('mouseleave', function () { render(parseInt(input.value) || 0); });
+        lbl.addEventListener('click', function () {
+            input.value = lbl.dataset.value;
+            render(parseInt(lbl.dataset.value));
+        });
+    });
+})();
+</script>
+@endpush
 @endsection

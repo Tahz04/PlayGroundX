@@ -162,35 +162,17 @@
                                 <span class="badge {{ $statusClass }} rounded-pill px-3 py-2 small">{{ $statusLabel }}</span>
                             </td>
                             <td class="text-end pe-4">
-                                <div class="d-flex flex-column align-items-end gap-2">
-                                    <form action="{{ route('admin.bookings.update-status', $booking) }}" method="POST" class="d-inline-block">
-                                        @csrf @method('PATCH')
-                                        <div class="input-group input-group-sm">
-                                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                <option value="pending"   {{ $booking->status == 'pending'   ? 'selected' : '' }}>Chờ</option>
-                                                <option value="confirmed" {{ $booking->status == 'confirmed' ? 'selected' : '' }}>Xác nhận</option>
-                                                <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>Xong</option>
-                                                <option value="cancelled" {{ $booking->status == 'cancelled' ? 'selected' : '' }}>Hủy</option>
-                                            </select>
-                                        </div>
-                                    </form>
-
-                                    {{-- Timer: chỉ hiện cho đơn đã confirmed hôm nay --}}
-                                    @if(in_array($booking->status, ['confirmed','paid']) && $booking->date === now()->toDateString() && $booking->end_time)
-                                        @if($booking->timer_started_at)
-                                            <div class="countdown-timer text-success fw-bold small d-flex align-items-center gap-1"
-                                                 data-end-datetime="{{ $booking->date }}T{{ $booking->end_time }}">
-                                                <i class="fas fa-stopwatch"></i>
-                                                <span class="timer-display">—</span>
-                                            </div>
-                                        @else
-                                            <button class="btn btn-sm btn-outline-info rounded-pill px-3 start-timer-btn"
-                                                    data-timer-url="{{ route('admin.bookings.start-timer', $booking) }}">
-                                                <i class="fas fa-play me-1"></i> Bắt đầu timer
-                                            </button>
-                                        @endif
-                                    @endif
-                                </div>
+                                <form action="{{ route('admin.bookings.update-status', $booking) }}" method="POST" class="d-inline-block">
+                                    @csrf @method('PATCH')
+                                    <div class="input-group input-group-sm">
+                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            <option value="pending"   {{ $booking->status == 'pending'   ? 'selected' : '' }}>Chờ</option>
+                                            <option value="confirmed" {{ $booking->status == 'confirmed' ? 'selected' : '' }}>Xác nhận</option>
+                                            <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>Xong</option>
+                                            <option value="cancelled" {{ $booking->status == 'cancelled' ? 'selected' : '' }}>Hủy</option>
+                                        </select>
+                                    </div>
+                                </form>
                             </td>
                         </tr>
                     @empty
@@ -217,59 +199,6 @@
     @endif
 </div>
 
-@push('scripts')
-<script>
-(function () {
-    const CSRF = document.querySelector('meta[name="csrf-token"]').content;
-
-    function startCountdown(displayEl, endDateTimeStr) {
-        function tick() {
-            const diff = Math.floor((new Date(endDateTimeStr) - new Date()) / 1000);
-            if (diff <= 0) {
-                displayEl.textContent = 'Hết giờ';
-                displayEl.closest('.countdown-timer').classList.replace('text-success', 'text-danger');
-                return;
-            }
-            const h = Math.floor(diff / 3600);
-            const m = Math.floor((diff % 3600) / 60);
-            const s = diff % 60;
-            displayEl.textContent = (h ? h + ':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-            if (diff <= 900) {
-                displayEl.closest('.countdown-timer').classList.replace('text-success', 'text-warning');
-            }
-            setTimeout(tick, 1000);
-        }
-        tick();
-    }
-
-    document.querySelectorAll('.countdown-timer').forEach(function (el) {
-        startCountdown(el.querySelector('.timer-display'), el.dataset.endDatetime);
-    });
-
-    document.querySelectorAll('.start-timer-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
-            fetch(btn.dataset.timerUrl, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) { alert(data.error); btn.disabled = false; btn.innerHTML = '<i class="fas fa-play me-1"></i> Bắt đầu timer'; return; }
-                const wrapper = document.createElement('div');
-                wrapper.className = 'countdown-timer text-success fw-bold small d-flex align-items-center gap-1';
-                wrapper.dataset.endDatetime = data.end_time_datetime;
-                wrapper.innerHTML = '<i class="fas fa-stopwatch"></i><span class="timer-display">—</span>';
-                btn.replaceWith(wrapper);
-                startCountdown(wrapper.querySelector('.timer-display'), data.end_time_datetime);
-            })
-            .catch(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-play me-1"></i> Bắt đầu timer'; });
-        });
-    });
-})();
-</script>
-@endpush
 
 <style>
 .table thead th {

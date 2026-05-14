@@ -492,8 +492,13 @@
                         
                         <div class="court-info">
                             <div>
-                                <i class="fas fa-star text-warning"></i>
-                                <strong>4.8</strong>
+                                @if($arena->reviewsCount() > 0)
+                                    <i class="fas fa-star text-warning"></i>
+                                    <strong>{{ $arena->averageRating() }}</strong>
+                                    <span class="text-muted">({{ $arena->reviewsCount() }})</span>
+                                @else
+                                    <span class="text-muted">Chưa có đánh giá</span>
+                                @endif
                             </div>
                             <div>
                                 <i class="fas fa-map-marker-alt"></i>

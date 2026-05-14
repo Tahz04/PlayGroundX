@@ -9,13 +9,21 @@ class MapController extends Controller
 {
     public function index()
     {
-        $arenas = Arena::whereNotNull('latitude')->whereNotNull('longitude')->get();
+        $arenas = Arena::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->get();
         return view('map', compact('arenas'));
     }
 
     public function getArenas()
     {
-        $arenas = Arena::whereNotNull('latitude')->whereNotNull('longitude')->get();
+        $arenas = Arena::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->get();
         return response()->json($arenas);
     }
 }

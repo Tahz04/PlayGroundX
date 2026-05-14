@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Payment;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AdminBookingController extends Controller
@@ -52,22 +51,4 @@ class AdminBookingController extends Controller
         return back()->with('success', 'Đã cập nhật trạng thái đơn đặt sân.');
     }
 
-    /** Bắt đầu bộ đếm thời gian (Admin) */
-    public function startTimer(Booking $booking): JsonResponse
-    {
-        if (!in_array($booking->status, ['confirmed', 'paid'])) {
-            return response()->json(['error' => 'Chỉ có thể bắt đầu timer cho đơn đã xác nhận.'], 422);
-        }
-
-        if ($booking->date !== now()->toDateString()) {
-            return response()->json(['error' => 'Chỉ có thể bắt đầu timer cho đơn hôm nay.'], 422);
-        }
-
-        $booking->update(['timer_started_at' => now()]);
-
-        return response()->json([
-            'timer_started_at'  => $booking->timer_started_at->toIso8601String(),
-            'end_time_datetime' => $booking->date . 'T' . $booking->end_time,
-        ]);
-    }
 }

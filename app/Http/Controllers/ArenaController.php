@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Arena;
 use App\Models\Booking;
+use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ArenaController extends Controller
@@ -16,7 +18,9 @@ class ArenaController extends Controller
     {
         $date = $request->get('date', now()->toDateString());
 
-        $query = Arena::whereIn('status', ['active', 'maintenance']);
+        $query = Arena::whereIn('status', ['active', 'maintenance'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -63,7 +67,9 @@ class ArenaController extends Controller
      */
     public function publicIndex(Request $request)
     {
-        $query = Arena::whereIn('status', ['active', 'maintenance']);
+        $query = Arena::whereIn('status', ['active', 'maintenance'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
 
         // Search by name or location
         if ($request->has('search') && !empty($request->search)) {
@@ -89,11 +95,51 @@ class ArenaController extends Controller
      */
     public function show(Arena $arena)
     {
-        // Only allow viewing active or maintenance arenas
         if (!in_array($arena->status, ['active', 'maintenance'])) {
             abort(404);
         }
-        return view('arenas.show', compact('arena'));
+
+        $reviews = Review::with('user')
+            ->where('arena_id', $arena->id)
+            ->latest()
+            ->get();
+
+        $avgRating   = $reviews->avg('rating') ? round($reviews->avg('rating'), 1) : null;
+        $ratingCount = $reviews->count();
+
+        // Kiểm tra user hiện tại có thể đánh giá không
+        $canReview   = false;
+        $alreadyReviewed = false;
+        if (Auth::check() && Auth::user()->role?->name === 'customer') {
+            $alreadyReviewed = Review::where('user_id', Auth::id())
+                ->where('arena_id', $arena->id)->exists();
+            if (!$alreadyReviewed) {
+                $canReview = Booking::where('user_id', Auth::id())
+                    ->where('arena_id', $arena->id)
+                    ->where('status', 'completed')
+                    ->exists();
+            }
+        }
+
+        $todayBookings = Booking::where('arena_id', $arena->id)
+            ->where('date', now()->toDateString())
+            ->whereIn('status', ['pending', 'confirmed', 'paid'])
+            ->get();
+
+        $todayBookedRanges = $todayBookings->map(function ($b) {
+            if (!empty($b->start_time) && !empty($b->end_time)) {
+                $end = substr($b->end_time, 0, 5);
+                return ['start' => substr($b->start_time, 0, 5), 'end' => $end === '00:00' ? '24:00' : $end];
+            } elseif ($b->timeSlot) {
+                $end = $b->timeSlot->end_time === '00:00:00' ? '24:00' : substr($b->timeSlot->end_time, 0, 5);
+                return ['start' => substr($b->timeSlot->start_time, 0, 5), 'end' => $end];
+            }
+            return null;
+        })->filter()->values()->toArray();
+
+        return view('arenas.show', compact(
+            'arena', 'reviews', 'avgRating', 'ratingCount', 'canReview', 'alreadyReviewed', 'todayBookedRanges'
+        ));
     }
 
     /**

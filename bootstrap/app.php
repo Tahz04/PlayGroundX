@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
-        $schedule->command('timers:notify-warning')->everyMinute();
+        $schedule->command('bookings:auto-complete')->dailyAt('00:05');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

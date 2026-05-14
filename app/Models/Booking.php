@@ -14,13 +14,6 @@ class Booking extends Model
         'start_time',
         'end_time',
         'status',
-        'timer_started_at',
-        'timer_notified',
-    ];
-
-    protected $casts = [
-        'timer_started_at' => 'datetime',
-        'timer_notified'   => 'boolean',
     ];
 
     public function payment()

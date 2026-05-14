@@ -259,7 +259,15 @@
                             </div>
                             <div class="pitch-meta">
                                 <div class="pitch-price">{{ number_format($arena->price) }}đ <span>/ giờ</span></div>
-                                <div class="pitch-rating"><i class="fas fa-star"></i> 4.9</div>
+                                <div class="pitch-rating">
+                                    @if($arena->reviewsCount() > 0)
+                                        <i class="fas fa-star"></i>
+                                        {{ $arena->averageRating() }}
+                                        <span>({{ $arena->reviewsCount() }})</span>
+                                    @else
+                                        <span>Chưa có đánh giá</span>
+                                    @endif
+                                </div>
                             </div>
                             @if($arena->isMaintenance())
                                 <button class="btn-book btn-book-maintenance w-100"
@@ -309,73 +317,42 @@
                 <p class="section-desc">Hàng ngàn khách hàng hài lòng với dịch vụ đặt sân của PlayGroundX</p>
             </div>
 
+            @if($reviews->isNotEmpty())
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="0">
+                @foreach($reviews->take(3) as $review)
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                     <div class="testimonial-card">
                         <div class="testimonial-stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $review->rating)
+                                    <i class="fas fa-star"></i>
+                                @else
+                                    <i class="far fa-star" style="color:#ccc;"></i>
+                                @endif
+                            @endfor
                         </div>
-                        <p class="testimonial-text">
-                            Dễ sử dụng, đặt sân nhanh gọn! Trước đây phải gọi điện hỏi từng sân, giờ chỉ cần vài click là xong. Sân bóng chất lượng, giá cả hợp lý.
-                        </p>
+                        <p class="testimonial-text">{{ Str::limit($review->comment, 150) }}</p>
                         <div class="testimonial-author">
-                            <div class="testimonial-avatar-placeholder">NT</div>
+                            <div class="testimonial-avatar-placeholder">{{ strtoupper(mb_substr($review->user->name, 0, 2)) }}</div>
                             <div>
-                                <div class="testimonial-name">Nguyễn Thanh Tùng</div>
-                                <div class="testimonial-role">Đội trưởng FC Thành Công</div>
+                                <div class="testimonial-name">{{ $review->user->name }}</div>
+                                <div class="testimonial-role">Đã chơi tại {{ $review->arena->name }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="testimonial-card">
-                        <div class="testimonial-stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            PlayGroundX giúp team mình tiết kiệm rất nhiều thời gian. Lịch đặt rõ ràng, có thể đặt trước cả tuần. Highly recommend cho anh em bóng đá!
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="testimonial-avatar-placeholder">LM</div>
-                            <div>
-                                <div class="testimonial-name">Lê Minh Đức</div>
-                                <div class="testimonial-role">Thành viên CLB Weekend Warriors</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="testimonial-card">
-                        <div class="testimonial-stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            Là chủ sân bóng, tôi rất hài lòng khi hợp tác với PlayGroundX. Lượng khách đặt sân tăng 40% kể từ khi tham gia nền tảng này!
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="testimonial-avatar-placeholder">TH</div>
-                            <div>
-                                <div class="testimonial-name">Trần Hữu Phong</div>
-                                <div class="testimonial-role">Chủ sân bóng Phú Mỹ Sport</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
+            @else
+            <div class="text-center py-5" data-aos="fade-up">
+                <i class="fas fa-comments fa-3x text-muted mb-3 d-block"></i>
+                <p class="text-muted mb-3">Chưa có đánh giá nào. Hãy là người đầu tiên trải nghiệm và đánh giá!</p>
+                <a href="{{ route('arenas.index') }}" class="btn-hero-secondary" style="color:var(--clr-dark-900);border-color:var(--clr-dark-300);">
+                    <i class="fas fa-futbol"></i>
+                    Xem Sân Bóng
+                </a>
+            </div>
+            @endif
         </div>
     </section>
 

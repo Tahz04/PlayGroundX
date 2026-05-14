@@ -12,7 +12,7 @@
                     @php
                     $bgImage = $arena->image ? asset('storage/' . $arena->image) : null;
                     @endphp
-                    <div class="col-lg-5 text-white p-5 d-flex flex-column justify-content-center" 
+                    <div class="col-lg-5 text-white p-5 d-flex flex-column justify-content-center"
                     style="@if($bgImage) background: linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.85)), url('{{ $bgImage }}') center/cover; background-size: cover; @else background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%); @endif">
                     <div class="mb-4">
                         <span class="badge bg-primary mb-2">{{ $arena->type }}</span>
@@ -21,7 +21,7 @@
                     </div>
                         <div class="pricing-info mb-5">
                             <h3 class="fw-bold text-primary" id="base-price-display">
-                                {{ number_format($arena->price) }}đ 
+                                {{ number_format($arena->price) }}đ
                                 <small class="text-white-50 fs-6">/ giờ</small>
                             </h3>
                             <div id="total-price-preview" class="mt-3 p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25" style="display: none;">
@@ -52,7 +52,7 @@
                                 {{ $errors->first() }}
                             </div>
                         @endif
-                        
+
                         @if(session('error'))
                             <div class="alert alert-danger mb-4" style="border-radius: 12px; border: none;">
                                 <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
@@ -65,12 +65,27 @@
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">1. Chọn Ngày Đặt</label>
-                                <input type="date" name="date" class="form-control form-control-lg" min="{{ date('Y-m-d') }}" value="{{ old('date', date('Y-m-d')) }}" required>
+                                <input type="date" id="date" name="date" class="form-control form-control-lg" min="{{ date('Y-m-d') }}" value="{{ old('date', date('Y-m-d')) }}" required>
                             </div>
 
                             <div class="mb-5">
                                 <label class="form-label fw-bold mb-3">2. Chọn Khung Giờ</label>
                                 <p class="text-muted small mb-3">Chọn giờ bắt đầu và giờ kết thúc, hệ thống sẽ tự đặt toàn bộ khung giờ liên tiếp trong khoảng đó.</p>
+
+                                {{-- Visual time grid --}}
+                                <div class="mb-3 p-3 rounded-3" style="background:#f8fafc;border:1.5px solid #e2e8f0;">
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <span class="fw-semibold small">Lịch trống:</span>
+                                        <span class="d-flex align-items-center gap-1 small">
+                                            <span style="display:inline-block;width:12px;height:12px;background:#dcfce7;border:1px solid #86efac;border-radius:3px;"></span> Còn trống
+                                        </span>
+                                        <span class="d-flex align-items-center gap-1 small">
+                                            <span style="display:inline-block;width:12px;height:12px;background:#fee2e2;border:1px solid #fca5a5;border-radius:3px;"></span> Đã đặt
+                                        </span>
+                                    </div>
+                                    <div id="time-grid" class="d-flex flex-wrap gap-1"></div>
+                                </div>
+
                                 @if($timeSlots->isEmpty())
                                     <div class="alert alert-warning mb-0" style="border-radius: 12px; border: none;">
                                         <i class="fas fa-clock me-2"></i>
@@ -85,7 +100,7 @@
                                                 @for($hour = 6; $hour <= 23; $hour++)
                                                     @foreach(['00', '30'] as $min)
                                                         @php $time = sprintf('%02d:%s', $hour, $min); @endphp
-                                                        <option value="{{ $time }}" data-slot-id="{{ $timeSlots->where('start_time', $time.':00')->first()?->id }}" {{ old('start_hour', '06:00') === $time ? 'selected' : '' }}>
+                                                        <option value="{{ $time }}" {{ old('start_hour') === $time ? 'selected' : '' }}>
                                                             {{ $time }}
                                                         </option>
                                                     @endforeach
@@ -98,13 +113,13 @@
                                                 <option value="">-- Chọn giờ kết thúc --</option>
                                                 @for($hour = 6; $hour <= 23; $hour++)
                                                     @foreach(['00', '30'] as $min)
-                                                        @php 
+                                                        @php
                                                             $nextMin = (int)$min + 30;
                                                             $nextHour = $nextMin >= 60 ? $hour + 1 : $hour;
                                                             $nextMin = $nextMin >= 60 ? 0 : $nextMin;
                                                             $time = sprintf('%02d:%02d', $nextHour, $nextMin);
                                                         @endphp
-                                                        <option value="{{ $time }}" data-slot-id="{{ $timeSlots->where('end_time', ($time === '24:00' ? '00:00:00' : $time.':00'))->first()?->id }}" {{ old('end_hour', '07:00') === $time ? 'selected' : '' }}>
+                                                        <option value="{{ $time }}" {{ old('end_hour') === $time ? 'selected' : '' }}>
                                                             {{ $time }}
                                                         </option>
                                                     @endforeach
@@ -171,23 +186,13 @@
         color: white;
         box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
     }
-    .form-control-lg {
+    .form-control-lg, .form-select-lg {
         padding: 0.8rem 1.25rem;
         border-radius: 15px;
         border: 2px solid #f1f5f9;
         font-weight: 600;
     }
-    .form-select-lg {
-        padding: 0.8rem 1.25rem;
-        border-radius: 15px;
-        border: 2px solid #f1f5f9;
-        font-weight: 600;
-    }
-    .form-control-lg:focus {
-        border-color: var(--clr-primary-400);
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-    }
-    .form-select-lg:focus {
+    .form-control-lg:focus, .form-select-lg:focus {
         border-color: var(--clr-primary-400);
         box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
     }
@@ -195,212 +200,173 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('booking-form');
-    const startSelect = document.getElementById('start_hour');
-    const endSelect = document.getElementById('end_hour');
-    const confirmBtn = document.getElementById('confirm-booking-btn');
-    const preview = document.getElementById('booking-range-preview');
-    const paymentOptions = document.querySelectorAll('input[name="payment_method"]');
-    
-    // Price preview elements
+    const form         = document.getElementById('booking-form');
+    const startSelect  = document.getElementById('start_hour');
+    const endSelect    = document.getElementById('end_hour');
+    const confirmBtn   = document.getElementById('confirm-booking-btn');
+    const preview      = document.getElementById('booking-range-preview');
+    const dateInput    = document.getElementById('date');
+    const paymentOpts  = document.querySelectorAll('input[name="payment_method"]');
     const pricePreview = document.getElementById('total-price-preview');
-    const calculatedPrice = document.getElementById('calculated-price');
-    const calculatedDuration = document.getElementById('calculated-duration');
+    const calcPrice    = document.getElementById('calculated-price');
+    const calcDur      = document.getElementById('calculated-duration');
+    const promoNotice  = document.getElementById('promo-notice');
+    const arenaPrice   = {{ $arena->price }};
 
-    const arenaPrice = {{ $arena->price }};
-    const arenaDuration = 60; // 60 minutes for hourly pricing
+    if (!form || !startSelect || !endSelect || !confirmBtn) return;
 
-    if (!form || !startSelect || !endSelect || !confirmBtn) {
-        return;
-    }
-
-    const timeToMinutes = (timeStr) => {
-        if (!timeStr) return 0;
-        const [h, m] = timeStr.split(':').map(Number);
-        return h * 60 + m;
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    const toMin = t => {
+        if (!t) return 0;
+        const parts = t.split(':');
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     };
 
-    const dateInput = document.getElementById('date');
-    const bookedSlotIds = @json($bookedSlotIds);
+    // Two ranges overlap when they share any minute (exclusive end)
+    const rangesOverlap = (s1, e1, s2, e2) =>
+        !(toMin(e1) <= toMin(s2) || toMin(s1) >= toMin(e2));
 
-    // Helper to check if two time ranges overlap
-    const timeRangesOverlap = (start1, end1, start2, end2) => {
-        const start1Min = timeToMinutes(start1);
-        const end1Min = timeToMinutes(end1);
-        const start2Min = timeToMinutes(start2);
-        const end2Min = timeToMinutes(end2);
-        return !(end1Min <= start2Min || start1Min >= end2Min);
-    };
+    const slotBooked = (slotStart, slotEnd) =>
+        bookedRanges.some(r => rangesOverlap(slotStart, slotEnd, r.start, r.end));
 
-    // Check if a time range conflicts with any booked ranges
-    const hasConflict = (startTime, endTime, bookedRanges) => {
-        if (!bookedRanges || bookedRanges.length === 0) return false;
-        
-        for (const range of bookedRanges) {
-            if (timeRangesOverlap(startTime, endTime, range.start, range.end)) {
-                return true;
+    // ── Booked-ranges state (PHP → JS, already HH:MM normalized) ─────────────
+    let bookedRanges = @json($bookedRanges);
+
+    // ── Time grid ─────────────────────────────────────────────────────────────
+    const buildGrid = () => {
+        const grid = document.getElementById('time-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        for (let h = 6; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const sH = String(h).padStart(2, '0');
+                const sM = String(m).padStart(2, '0');
+                const em = h * 60 + m + 30;
+                const eH = String(Math.floor(em / 60)).padStart(2, '0');
+                const eM = String(em % 60).padStart(2, '0');
+                const s  = `${sH}:${sM}`;
+                const e  = em >= 1440 ? '24:00' : `${eH}:${eM}`;
+
+                const booked = slotBooked(s, e);
+                const cell = document.createElement('div');
+                cell.style.cssText =
+                    'padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;line-height:1.7;cursor:default;' +
+                    (booked
+                        ? 'background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;text-decoration:line-through;opacity:.85;'
+                        : 'background:#dcfce7;color:#166534;border:1px solid #86efac;');
+                cell.title       = `${s}–${e}: ${booked ? 'Đã có người đặt' : 'Còn trống'}`;
+                cell.textContent = s;
+                grid.appendChild(cell);
             }
         }
-        return false;
     };
 
-    let bookedRanges = [];
-
-    const updateBookedSlots = (data) => {
-        // Handle both old format (bookedSlotIds) and new format (bookedRanges)
-        if (data.bookedRanges) {
-            bookedRanges = data.bookedRanges;
-        } else if (data.bookedSlotIds) {
-            // For backward compatibility with old format
-            bookedRanges = [];
-        }
-
-        // Update start select options
-        for (const option of startSelect.options) {
-            if (!option.value) continue;
-            
-            // Check if selecting this start time would create a conflict
-            // We check with a default 1-hour duration
-            const startTime = option.value;
-            const endTime = (() => {
-                const start = timeToMinutes(startTime);
-                const end = start + 60;
-                const endHour = Math.floor(end / 60);
-                const endMin = end % 60;
-                return String(endHour).padStart(2, '0') + ':' + String(endMin).padStart(2, '0');
+    // ── Dropdown options ──────────────────────────────────────────────────────
+    const refreshStartOpts = () => {
+        for (const opt of startSelect.options) {
+            if (!opt.value) continue;
+            // A start time is blocked if there is ANY booked range that
+            // covers at least the first 30-min slot starting here.
+            const slotEnd = (() => {
+                const em = toMin(opt.value) + 30;
+                return `${String(Math.floor(em/60)).padStart(2,'0')}:${String(em%60).padStart(2,'0')}`;
             })();
-
-            const hasConflictStart = hasConflict(startTime, endTime, bookedRanges);
-            
-            if (hasConflictStart) {
-                option.disabled = true;
-                option.classList.add('text-muted');
-                if (!option.innerHTML.includes('Hết')) {
-                    option.innerHTML = option.value + ' (Hết)';
-                }
-            } else {
-                option.disabled = false;
-                option.classList.remove('text-muted');
-                option.innerHTML = option.value;
-            }
-        }
-        
-        syncEndOptions();
-    };
-
-    // Initialize with data from server
-    if (@json($bookedRanges)) {
-        bookedRanges = @json($bookedRanges);
-    }
-    updateBookedSlots({ bookedSlotIds, bookedRanges });
-
-    if (dateInput) {
-        dateInput.addEventListener('change', function() {
-            const date = this.value;
-            fetch(`{{ route('bookings.booked-slots', $arena) }}?date=${date}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.bookedRanges) {
-                        bookedRanges = data.bookedRanges;
-                    }
-                    updateBookedSlots(data);
-                    setButtonState();
-                });
-        });
-    }
-
-    const setButtonState = () => {
-        const startVal = startSelect.value;
-        const endVal = endSelect.value;
-        
-        const startMinutes = timeToMinutes(startVal);
-        const endMinutes = timeToMinutes(endVal);
-        
-        const hasPaymentMethod = Array.from(paymentOptions).some(option => option.checked);
-
-        if (!startVal || !endVal) {
-            confirmBtn.disabled = true;
-            if (preview) {
-                preview.textContent = 'Vui lòng chọn đủ giờ bắt đầu và giờ kết thúc.';
-                preview.classList.remove('text-danger');
-            }
-            pricePreview.style.display = 'none';
-            return;
-        }
-
-        const duration = endMinutes - startMinutes;
-        const isValid = duration >= 60; // Minimum 1 hour
-
-        confirmBtn.disabled = !isValid || !hasPaymentMethod;
-        
-        if (isValid) {
-            preview.textContent = 'Bạn đang đặt từ ' + startVal + ' đến ' + endVal + '.';
-            preview.classList.remove('text-danger');
-
-            // Calculate Price
-            let totalPrice = (duration / arenaDuration) * arenaPrice;
-            
-            // Promotion Logic
-            const promoNotice = document.getElementById('promo-notice');
-            if (duration >= 180) {
-                totalPrice = totalPrice * 0.9;
-                promoNotice.style.display = 'block';
-            } else {
-                promoNotice.style.display = 'none';
-            }
-
-            calculatedPrice.textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + 'đ';
-            calculatedDuration.textContent = duration + ' phút (' + (duration/60).toFixed(1) + ' giờ)';
-            pricePreview.style.display = 'block';
-        } else {
-            preview.textContent = duration <= 0 
-                ? 'Giờ kết thúc phải lớn hơn giờ bắt đầu.' 
-                : 'Thời gian đặt tối thiểu là 60 phút (hiện tại: ' + duration + ' phút).';
-            preview.classList.add('text-danger');
-            pricePreview.style.display = 'none';
+            const blocked = slotBooked(opt.value, slotEnd);
+            opt.disabled     = blocked;
+            opt.textContent  = blocked ? `${opt.value} (Đã đặt)` : opt.value;
         }
     };
 
-    const syncEndOptions = function () {
-        const startVal = startSelect.value;
-        const startMinutes = timeToMinutes(startVal);
-
-        for (const option of endSelect.options) {
-            if (!option.value) continue;
-            const endMinutes = timeToMinutes(option.value);
-            
-            // Disable if end time is before or equal start time
-            const isBeforeStart = startVal && endMinutes <= startMinutes;
-            
-            // Check if this range would conflict with booked slots
-            const rangeConflict = startVal && hasConflict(startVal, option.value, bookedRanges);
-            
-            option.disabled = isBeforeStart || rangeConflict;
+    const refreshEndOpts = () => {
+        const sv = startSelect.value;
+        for (const opt of endSelect.options) {
+            if (!opt.value) continue;
+            // Disable if: no start chosen, end ≤ start, or range conflicts
+            opt.disabled = !sv
+                || toMin(opt.value) <= toMin(sv)
+                || slotBooked(sv, opt.value);
+            opt.textContent = opt.value; // reset label
         }
-
-        if (endSelect.selectedOptions.length > 0 && endSelect.selectedOptions[0].disabled) {
+        // Clear selected end if it became disabled
+        if (endSelect.value && endSelect.options[endSelect.selectedIndex]?.disabled) {
             endSelect.value = '';
         }
     };
 
-    startSelect.addEventListener('change', function () {
-        syncEndOptions();
-        setButtonState();
-    });
+    // ── Price preview ─────────────────────────────────────────────────────────
+    const refreshUI = () => {
+        const sv = startSelect.value;
+        const ev = endSelect.value;
+        const hasPay = Array.from(paymentOpts).some(o => o.checked);
 
-    endSelect.addEventListener('change', setButtonState);
-    paymentOptions.forEach(option => option.addEventListener('change', setButtonState));
-
-    form.addEventListener('submit', function () {
-        if (confirmBtn.disabled) {
+        if (!sv || !ev) {
+            confirmBtn.disabled = true;
+            if (preview) preview.textContent = '';
+            pricePreview.style.display = 'none';
             return;
         }
+
+        const dur = toMin(ev) - toMin(sv);
+
+        if (dur < 60) {
+            confirmBtn.disabled = true;
+            if (preview) {
+                preview.textContent = dur <= 0
+                    ? 'Giờ kết thúc phải lớn hơn giờ bắt đầu.'
+                    : `Tối thiểu 60 phút (đang chọn ${dur} phút).`;
+                preview.className = 'text-danger small mt-2';
+            }
+            pricePreview.style.display = 'none';
+            return;
+        }
+
+        confirmBtn.disabled = !hasPay;
+        if (preview) {
+            preview.textContent = `Bạn đang đặt từ ${sv} đến ${ev}.`;
+            preview.className   = 'text-muted small mt-2';
+        }
+
+        let price = (dur / 60) * arenaPrice;
+        if (dur >= 180) {
+            price *= 0.9;
+            promoNotice.style.display = 'block';
+        } else {
+            promoNotice.style.display = 'none';
+        }
+        calcPrice.textContent = new Intl.NumberFormat('vi-VN').format(Math.round(price)) + 'đ';
+        calcDur.textContent   = `${dur} phút (${(dur / 60).toFixed(1)} giờ)`;
+        pricePreview.style.display = 'block';
+    };
+
+    // ── Date change → reload booked slots via AJAX ────────────────────────────
+    if (dateInput) {
+        dateInput.addEventListener('change', function () {
+            fetch(`{{ route('bookings.booked-slots', $arena) }}?date=${this.value}`)
+                .then(r => r.json())
+                .then(data => {
+                    bookedRanges = Array.isArray(data.bookedRanges) ? data.bookedRanges : [];
+                    buildGrid();
+                    refreshStartOpts();
+                    refreshEndOpts();
+                    refreshUI();
+                });
+        });
+    }
+
+    // ── Event listeners ───────────────────────────────────────────────────────
+    startSelect.addEventListener('change', () => { refreshEndOpts(); refreshUI(); });
+    endSelect.addEventListener('change', refreshUI);
+    paymentOpts.forEach(o => o.addEventListener('change', refreshUI));
+    form.addEventListener('submit', () => {
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = 'Đang gửi yêu cầu...';
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang gửi yêu cầu...';
     });
 
-    syncEndOptions();
-    setButtonState();
+    // ── Initial render ────────────────────────────────────────────────────────
+    buildGrid();
+    refreshStartOpts();
+    refreshEndOpts();
+    refreshUI();
 });
 </script>
 @endsection

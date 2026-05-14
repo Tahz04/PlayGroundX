@@ -25,6 +25,18 @@
             </div>
         @endif
 
+        @if(session('review_success'))
+            <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+                <i class="fas fa-check-circle me-2"></i>{{ session('review_success') }}
+            </div>
+        @endif
+
+        @if(session('review_error'))
+            <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i>{{ session('review_error') }}
+            </div>
+        @endif
+
         <div class="row g-4">
         @forelse($bookings as $booking)
             <div class="col-lg-6">
@@ -111,11 +123,65 @@
                                             <i class="fas fa-comments me-1"></i> Thương lượng
                                         </a>
                                     </div>
+                                @elseif($booking->status == 'completed')
+                                    <div class="mt-4 text-end">
+                                        @if(in_array($booking->arena_id, $reviewedArenaIds ?? []))
+                                            <span class="btn btn-outline-success btn-sm rounded-pill px-3 disabled">
+                                                <i class="fas fa-check-circle me-1"></i> Đã đánh giá
+                                            </span>
+                                        @else
+                                            <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#reviewModal-{{ $booking->id }}">
+                                                <i class="fas fa-star me-1"></i> Đánh giá sân
+                                            </button>
+                                        @endif
+                                    </div>
                                 @endif
                             </div>
                         </div>
                     </div>
                 </div>
+
+                @if($booking->status == 'completed' && !in_array($booking->arena_id, $reviewedArenaIds ?? []))
+                    <div class="modal fade" id="reviewModal-{{ $booking->id }}" tabindex="-1" aria-labelledby="reviewModalLabel-{{ $booking->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 rounded-4 shadow">
+                                <form action="{{ route('reviews.store', $booking->arena) }}" method="POST">
+                                    @csrf
+                                    <div class="modal-header border-0 pb-0">
+                                        <div>
+                                            <h5 class="modal-title fw-bold" id="reviewModalLabel-{{ $booking->id }}">Đánh giá sân</h5>
+                                            <div class="text-muted small">{{ $booking->arena->name }}</div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Số sao</label>
+                                            <select name="rating" class="form-select rounded-3" required>
+                                                <option value="">Chọn số sao</option>
+                                                <option value="5">5 sao - Rất hài lòng</option>
+                                                <option value="4">4 sao - Hài lòng</option>
+                                                <option value="3">3 sao - Bình thường</option>
+                                                <option value="2">2 sao - Chưa tốt</option>
+                                                <option value="1">1 sao - Không hài lòng</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-0">
+                                            <label class="form-label fw-semibold">Nhận xét</label>
+                                            <textarea name="comment" class="form-control rounded-3" rows="4" minlength="10" maxlength="1000" required placeholder="Chia sẻ trải nghiệm của bạn tại sân này..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0 pt-0">
+                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                            <i class="fas fa-paper-plane me-1"></i> Gửi đánh giá
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         @empty
             <div class="col-12">

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Arena;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,7 +46,7 @@ class OwnerBookingController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled'
+            'status' => 'required|in:pending,confirmed,cancelled,completed'
         ]);
 
         $booking->update(['status' => $request->status]);
@@ -55,13 +54,21 @@ class OwnerBookingController extends Controller
         // Cập nhật trạng thái thanh toán tương ứng
         if ($booking->payment) {
             $paymentStatus = $request->status === 'confirmed' ? 'paid' : 'pending';
+            if ($request->status === 'completed') {
+                $paymentStatus = 'paid';
+            }
             if ($request->status === 'cancelled') {
                 $paymentStatus = 'failed';
             }
             $booking->payment->update(['status' => $paymentStatus]);
         }
 
-        $statusText = $request->status === 'confirmed' ? 'xác nhận' : ($request->status === 'cancelled' ? 'hủy' : 'cập nhật');
+        $statusText = match ($request->status) {
+            'confirmed' => 'xác nhận',
+            'completed' => 'hoàn thành',
+            'cancelled' => 'hủy',
+            default => 'cập nhật',
+        };
         return back()->with('success', "Đã {$statusText} đơn đặt sân thành công!");
     }
 
@@ -112,30 +119,6 @@ class OwnerBookingController extends Controller
         }
 
         return back()->with('success', 'Đã hủy đơn đặt sân.');
-    }
-
-    /** Bắt đầu bộ đếm thời gian cho một booking */
-    public function startTimer(Booking $booking): JsonResponse
-    {
-        $arenaIds = Auth::user()->arenas()->pluck('id');
-        if (!$arenaIds->contains($booking->arena_id)) {
-            return response()->json(['error' => 'Bạn không có quyền thao tác trên đơn này.'], 403);
-        }
-
-        if (!in_array($booking->status, ['confirmed', 'paid'])) {
-            return response()->json(['error' => 'Chỉ có thể bắt đầu timer cho đơn đã xác nhận.'], 422);
-        }
-
-        if ($booking->date !== now()->toDateString()) {
-            return response()->json(['error' => 'Chỉ có thể bắt đầu timer cho đơn hôm nay.'], 422);
-        }
-
-        $booking->update(['timer_started_at' => now()]);
-
-        return response()->json([
-            'timer_started_at'  => $booking->timer_started_at->toIso8601String(),
-            'end_time_datetime' => $booking->date . 'T' . $booking->end_time,
-        ]);
     }
 
     /**
