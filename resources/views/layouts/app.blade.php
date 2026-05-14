@@ -23,8 +23,8 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('styles')
 </head>
@@ -500,9 +500,6 @@
 
     <!-- AOS JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-    <!-- Custom JS -->
-    <script src="{{ asset('js/app.js') }}"></script>
 
     @stack('scripts')
     <!-- Chatbot Widget -->
