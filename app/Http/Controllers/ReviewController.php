@@ -43,9 +43,10 @@ class ReviewController extends Controller
             'arena_id' => $arena->id,
             'rating'   => $data['rating'],
             'comment'  => $data['comment'],
+            'status'   => 'pending', // Mặc định review chờ duyệt
         ]);
 
-        return back()->with('review_success', 'Cảm ơn bạn đã đánh giá!');
+        return back()->with('review_success', 'Cảm ơn bạn đã đánh giá! Review của bạn đang chờ duyệt.');
     }
 
     public function destroy(Review $review)

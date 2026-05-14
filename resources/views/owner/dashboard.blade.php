@@ -97,19 +97,33 @@
             </div>
         </div>
 
-        <!-- Thu nhập theo tháng -->
+        <!-- Thu nhập báo cáo (ngày/tháng/năm) -->
         <div class="card border-0 rounded-4 shadow-sm bg-white mb-5">
             <div class="card-body p-4">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div>
-                        <h5 class="mb-1"><i class="fas fa-chart-line text-success me-2"></i>Thu Nhập Theo Tháng</h5>
+                        <h5 class="mb-1"><i class="fas fa-chart-line text-success me-2"></i>Báo Cáo Doanh Thu</h5>
                         <p class="text-muted mb-0 small">Tổng doanh thu từ các đơn đã thanh toán</p>
                     </div>
-                    <form method="GET" action="{{ route('owner.dashboard') }}" class="d-flex align-items-center gap-2">
-                        <input type="month" name="month" class="form-control form-control-sm"
-                               value="{{ $selectedMonth }}" style="width: auto;">
+                    <form method="GET" action="{{ route('owner.dashboard') }}" class="d-flex align-items-center gap-2 flex-wrap">
+                        <select name="period" class="form-select form-select-sm" id="periodSelector" style="width: auto;">
+                            <option value="day" {{ $period === 'day' ? 'selected' : '' }}>Ngày</option>
+                            <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Tháng</option>
+                            <option value="year" {{ $period === 'year' ? 'selected' : '' }}>Năm</option>
+                        </select>
+                        
+                        <!-- Input Date/Month/Year (dynamic) -->
+                        @if($period === 'day')
+                            <input type="date" name="date" class="form-control form-control-sm" value="{{ $selectedDate }}" style="width: auto;">
+                        @elseif($period === 'year')
+                            <input type="number" name="date" class="form-control form-control-sm" placeholder="YYYY" 
+                                   value="{{ date('Y', strtotime($selectedDate)) }}" min="2020" max="{{ date('Y') + 1 }}" style="width: auto;">
+                        @else
+                            <input type="month" name="date" class="form-control form-control-sm" value="{{ substr($selectedDate, 0, 7) }}" style="width: auto;">
+                        @endif
+                        
                         <button type="submit" class="btn btn-sm btn-primary px-3">
-                            <i class="fas fa-filter me-1"></i>Lọc
+                            <i class="fas fa-filter me-1"></i>Xem Báo Cáo
                         </button>
                     </form>
                 </div>
@@ -117,10 +131,10 @@
                 <div class="row g-4 mb-4">
                     <div class="col-md-4">
                         <div class="p-4 rounded-4 text-center" style="background: linear-gradient(135deg, #10b981, #059669);">
-                            <p class="text-white mb-1 small opacity-75">Tổng thu nhập tháng</p>
-                            <h2 class="text-white fw-bold mb-0">{{ number_format($monthlyIncome) }} <span class="fs-5">đ</span></h2>
+                            <p class="text-white mb-1 small opacity-75">Tổng doanh thu</p>
+                            <h2 class="text-white fw-bold mb-0">{{ number_format($income) }} <span class="fs-5">đ</span></h2>
                             <p class="text-white opacity-75 mb-0 small mt-1">
-                                {{ \Carbon\Carbon::createFromFormat('Y-m', $selectedMonth)->locale('vi')->isoFormat('MMMM Y') }}
+                                {{ $displayFormat }}
                             </p>
                         </div>
                     </div>
@@ -211,4 +225,11 @@
         </div>
     </div>
 </section>
+
+<script>
+document.getElementById('periodSelector')?.addEventListener('change', function() {
+    const form = this.closest('form');
+    form.submit();
+});
+</script>
 @endsection

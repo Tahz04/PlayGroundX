@@ -405,10 +405,60 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                                <!-- Admin: Status Badge -->
+                                @if($isAdmin)
+                                    @php
+                                        $statusClass = match($review->status) {
+                                            'pending' => 'bg-warning text-dark',
+                                            'approved' => 'bg-success text-white',
+                                            'rejected' => 'bg-danger text-white',
+                                            default => 'bg-secondary'
+                                        };
+                                        $statusText = match($review->status) {
+                                            'pending' => 'Chờ duyệt',
+                                            'approved' => 'Đã duyệt',
+                                            'rejected' => 'Từ chối',
+                                            default => $review->status
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $statusClass }} rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                                        {{ $statusText }}
+                                    </span>
+                                @endif
+                                
                                 <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
+                                
                                 @auth
-                                    @if(Auth::id() === $review->user_id || Auth::user()->isAdmin())
+                                    @if(Auth::user()->isAdmin())
+                                        <!-- Admin Actions -->
+                                        @if($review->status === 'pending')
+                                            <!-- Approve Button -->
+                                            <form action="{{ route('admin.reviews.approve', $review) }}" method="POST" class="d-inline">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="btn btn-sm btn-success rounded-pill" title="Duyệt">
+                                                    <i class="fas fa-check" style="font-size: 0.75rem;"></i>
+                                                </button>
+                                            </form>
+                                            <!-- Reject Button -->
+                                            <form action="{{ route('admin.reviews.reject', $review) }}" method="POST" class="d-inline">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="btn btn-sm btn-warning rounded-pill" title="Từ chối">
+                                                    <i class="fas fa-times" style="font-size: 0.75rem;"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        
+                                        <!-- Delete Button (all reviews) -->
+                                        <form action="{{ route('admin.reviews.destroy', $review) }}" method="POST" class="d-inline"
+                                              onsubmit="return confirm('Xóa đánh giá này?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Xóa">
+                                                <i class="fas fa-trash-alt" style="font-size: 0.75rem;"></i>
+                                            </button>
+                                        </form>
+                                    @elseif(Auth::id() === $review->user_id)
+                                        <!-- User delete own review -->
                                         <form action="{{ route('reviews.destroy', $review) }}" method="POST"
                                               onsubmit="return confirm('Xóa đánh giá này?')">
                                             @csrf @method('DELETE')

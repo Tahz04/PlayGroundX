@@ -99,13 +99,27 @@ class ArenaController extends Controller
             abort(404);
         }
 
-        $reviews = Review::with('user')
-            ->where('arena_id', $arena->id)
-            ->latest()
-            ->get();
+        // Lấy tất cả review để tính rating trung bình
+        $allReviews = Review::where('arena_id', $arena->id)->get();
+        $avgRating   = $allReviews->avg('rating') ? round($allReviews->avg('rating'), 1) : null;
+        $ratingCount = $allReviews->count();
 
-        $avgRating   = $reviews->avg('rating') ? round($reviews->avg('rating'), 1) : null;
-        $ratingCount = $reviews->count();
+        // Kiểm tra user có phải admin không
+        $isAdmin = Auth::check() && Auth::user()->isAdmin();
+        
+        // Nếu admin, hiển thị tất cả reviews; nếu không, chỉ hiển thị approved
+        if ($isAdmin) {
+            $reviews = Review::with('user')
+                ->where('arena_id', $arena->id)
+                ->latest()
+                ->get();
+        } else {
+            $reviews = Review::with('user')
+                ->where('arena_id', $arena->id)
+                ->approved()
+                ->latest()
+                ->get();
+        }
 
         // Kiểm tra user hiện tại có thể đánh giá không
         $canReview   = false;
@@ -138,7 +152,7 @@ class ArenaController extends Controller
         })->filter()->values()->toArray();
 
         return view('arenas.show', compact(
-            'arena', 'reviews', 'avgRating', 'ratingCount', 'canReview', 'alreadyReviewed', 'todayBookedRanges'
+            'arena', 'reviews', 'avgRating', 'ratingCount', 'canReview', 'alreadyReviewed', 'todayBookedRanges', 'isAdmin'
         ));
     }
 

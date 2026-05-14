@@ -42,13 +42,19 @@ class BookingNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $url = route('admin.bookings.index');
+
+        if (method_exists($notifiable, 'isOwner') && $notifiable->isOwner()) {
+            $url = route('owner.bookings.index');
+        }
+
         return [
             'booking_id' => $this->booking->id,
             'arena_name' => $this->booking->arena->name ?? 'Sân bóng',
             'action' => $this->action, // 'created', 'cancelled'
             'message' => $this->message,
             'date' => $this->booking->date,
-            'url' => route('admin.bookings.index')
+            'url' => $url,
         ];
     }
 }

@@ -8,7 +8,6 @@ use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\OwnerRequestController;
-use App\Http\Controllers\OwnerBookingController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +20,7 @@ Route::get('/', function () {
         ->get();
     $reviews = \App\Models\Review::with(['user', 'arena'])
         ->where('rating', '>=', 4)
+        ->where('status', 'approved')
         ->latest()
         ->take(6)
         ->get();
@@ -99,6 +99,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/negotiations', [NegotiationController::class, 'index'])->name('negotiations.index');
         Route::patch('/negotiations/{negotiation}/accept', [NegotiationController::class, 'accept'])->name('negotiations.accept');
         Route::patch('/negotiations/{negotiation}/reject', [NegotiationController::class, 'reject'])->name('negotiations.reject');
+        // Đánh giá (reviews)
+        Route::get('/reviews', [\App\Http\Controllers\OwnerReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews/{review}/report', [\App\Http\Controllers\OwnerReviewController::class, 'report'])->name('reviews.report');
     });
 
     // Notifications
@@ -119,5 +122,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/owner-requests', [AdminController::class, 'index'])->name('owner-requests.index');
             Route::patch('/owner-requests/{ownerRequest}/approve', [AdminController::class, 'approve'])->name('owner-requests.approve');
             Route::patch('/owner-requests/{ownerRequest}/reject', [AdminController::class, 'reject'])->name('owner-requests.reject');
+
+            // Quản lý đánh giá
+            Route::get('/reviews', [\App\Http\Controllers\AdminReviewController::class, 'index'])->name('reviews.index');
+            Route::patch('/reviews/{review}/approve', [\App\Http\Controllers\AdminReviewController::class, 'approve'])->name('reviews.approve');
+            Route::patch('/reviews/{review}/reject', [\App\Http\Controllers\AdminReviewController::class, 'reject'])->name('reviews.reject');
+            Route::delete('/reviews/{review}', [\App\Http\Controllers\AdminReviewController::class, 'destroy'])->name('reviews.destroy');
         });
     });

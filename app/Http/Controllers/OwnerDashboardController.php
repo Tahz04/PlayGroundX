@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Arena;
 use App\Models\Booking;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class OwnerDashboardController extends Controller
@@ -25,15 +25,84 @@ class OwnerDashboardController extends Controller
         $pendingBookings   = Booking::whereIn('arena_id', $arenaIds)->where('status', 'pending')->count();
         $confirmedBookings = Booking::whereIn('arena_id', $arenaIds)->where('status', 'confirmed')->count();
 
-        // Thu nhập theo tháng
-        $selectedMonth = request('month', now()->format('Y-m'));
-        [$year, $month] = explode('-', $selectedMonth);
+        // Lọc theo period (day/month/year)
+        $period = request('period', 'month');
+        $rawDate = request('date', '');
+        
+        // Normalize selectedDate dựa theo period
+        $selectedDate = '';
+        switch ($period) {
+            case 'day':
+                // Nếu là Y-m hoặc Y, convert sang Y-m-d
+                if (strlen($rawDate) == 7) { // Y-m format
+                    $selectedDate = substr($rawDate, 0, 7) . '-01';
+                } elseif (strlen($rawDate) == 4) { // Y format
+                    $selectedDate = $rawDate . '-01-01';
+                } else {
+                    $selectedDate = $rawDate ?: now()->format('Y-m-d');
+                }
+                break;
+                
+            case 'month':
+                // Nếu là Y-m-d, lấy năm-tháng; nếu là Y, convert sang Y-01
+                if (strlen($rawDate) == 10) { // Y-m-d format
+                    $selectedDate = substr($rawDate, 0, 7);
+                } elseif (strlen($rawDate) == 4) { // Y format
+                    $selectedDate = $rawDate . '-01';
+                } else {
+                    $selectedDate = $rawDate ?: now()->format('Y-m');
+                }
+                break;
+                
+            case 'year':
+                // Lấy chỉ năm
+                if (strlen($rawDate) >= 4) {
+                    $selectedDate = substr($rawDate, 0, 4);
+                } else {
+                    $selectedDate = $rawDate ?: now()->format('Y');
+                }
+                break;
+                
+            default:
+                $selectedDate = $rawDate ?: now()->format('Y-m');
+        }
+        
+        // Tính from/to date dựa theo period
+        $fromDate = $toDate = null;
+        $displayFormat = '';
+        
+        switch ($period) {
+            case 'day':
+                // Input: Y-m-d format
+                $date = Carbon::createFromFormat('Y-m-d', $selectedDate);
+                $fromDate = $date->copy()->startOfDay();
+                $toDate = $date->copy()->endOfDay();
+                $displayFormat = $date->locale('vi')->isoFormat('D MMMM Y');
+                break;
+            
+            case 'year':
+                // Input: YYYY format (only year number)
+                $year = (int)$selectedDate;
+                $fromDate = Carbon::createFromFormat('Y-m-d', "$year-01-01")->startOfDay();
+                $toDate = Carbon::createFromFormat('Y-m-d', "$year-12-31")->endOfDay();
+                $displayFormat = "Năm $year";
+                break;
+            
+            case 'month':
+            default:
+                // Input: Y-m format
+                $date = Carbon::createFromFormat('Y-m', $selectedDate)->startOfMonth();
+                $fromDate = $date->copy()->startOfDay();
+                $toDate = $date->copy()->endOfMonth()->endOfDay();
+                $displayFormat = $date->locale('vi')->isoFormat('MMMM Y');
+                break;
+        }
 
-        $monthlyIncome = Payment::whereHas('booking', function ($q) use ($arenaIds, $year, $month) {
+        // Tính doanh thu theo period
+        $income = Payment::whereHas('booking', function ($q) use ($arenaIds, $fromDate, $toDate) {
                 $q->whereIn('arena_id', $arenaIds)
                   ->whereIn('status', ['confirmed', 'paid', 'completed'])
-                  ->whereYear('date', $year)
-                  ->whereMonth('date', $month);
+                  ->whereBetween('date', [$fromDate->toDateString(), $toDate->toDateString()]);
             })
             ->where('status', 'paid')
             ->sum('amount');
@@ -42,8 +111,7 @@ class OwnerDashboardController extends Controller
             ->join('bookings', 'bookings.id', '=', 'payments.booking_id')
             ->whereIn('bookings.arena_id', $arenaIds)
             ->whereIn('bookings.status', ['confirmed', 'paid', 'completed'])
-            ->whereYear('bookings.date', $year)
-            ->whereMonth('bookings.date', $month)
+            ->whereBetween('bookings.date', [$fromDate->toDateString(), $toDate->toDateString()])
             ->where('payments.status', 'paid')
             ->groupBy('bookings.arena_id')
             ->get()
@@ -52,7 +120,7 @@ class OwnerDashboardController extends Controller
         return view('owner.dashboard', compact(
             'user', 'arenas', 'totalArenas', 'totalBookings',
             'pendingBookings', 'confirmedBookings',
-            'monthlyIncome', 'incomeByArena', 'selectedMonth'
+            'income', 'incomeByArena', 'period', 'selectedDate', 'displayFormat'
         ));
     }
 }
