@@ -95,6 +95,10 @@
                                                 <i class="fas fa-edit me-1"></i> Sửa
                                             </a>
 
+                                            <a href="{{ route('owner.reviews.index', ['arena_id' => $arena->id]) }}" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                                                <i class="fas fa-star me-1"></i> Xem Reviews
+                                            </a>
+
                                             {{-- Nút bảo trì / kích hoạt --}}
                                             @if($arena->isMaintenance())
                                                 <form action="{{ route('owner.arenas.toggle-maintenance', $arena) }}" method="POST" class="flex-grow-1">

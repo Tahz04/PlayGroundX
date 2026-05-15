@@ -82,37 +82,14 @@
 
                         <!-- Report Button -->
                         @if($review->status === 'approved')
-                            <button class="btn btn-outline-danger btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $review->id }}">
+                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill report-button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#reportModal"
+                                    data-review-id="{{ $review->id }}"
+                                    data-review-arena="{{ $review->arena->name }}"
+                                    data-review-user="{{ $review->user->name }}">
                                 <i class="fas fa-flag me-1"></i> Báo cáo
                             </button>
-
-                            <!-- Report Modal -->
-                            <div class="modal fade" id="reportModal-{{ $review->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content border-0 rounded-4">
-                                        <div class="modal-header border-0">
-                                            <h5 class="modal-title fw-bold">Báo cáo đánh giá</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form action="{{ route('owner.reviews.report', $review) }}" method="POST">
-                                            @csrf
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Lý do báo cáo:</label>
-                                                    <textarea name="reason" class="form-control rounded-3" rows="4" placeholder="Mô tả chi tiết lý do báo cáo..." required></textarea>
-                                                </div>
-                                                <p class="text-muted small">Admin sẽ xem xét báo cáo của bạn sớm nhất có thể.</p>
-                                            </div>
-                                            <div class="modal-footer border-0">
-                                                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Hủy</button>
-                                                <button type="submit" class="btn btn-danger rounded-pill">
-                                                    <i class="fas fa-flag me-1"></i> Báo cáo
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         @endif
                     </div>
                 </div>
@@ -135,6 +112,35 @@
     </div>
 </section>
 
+<!-- Single Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Báo cáo đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="reportForm" action="" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted mb-3">Báo cáo review của <strong id="reportUserName"></strong> trên sân <strong id="reportArenaName"></strong>.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Lý do báo cáo:</label>
+                        <textarea name="reason" class="form-control rounded-3" rows="4" placeholder="Mô tả chi tiết lý do báo cáo..." required></textarea>
+                    </div>
+                    <p class="text-muted small">Admin sẽ xem xét báo cáo của bạn sớm nhất có thể.</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger rounded-pill">
+                        <i class="fas fa-flag me-1"></i> Báo cáo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
     .card {
         transition: transform 0.2s, box-shadow 0.2s;
@@ -144,4 +150,23 @@
         box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
     }
 </style>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.report-button').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var reviewId = this.dataset.reviewId;
+                var arenaName = this.dataset.reviewArena;
+                var userName = this.dataset.reviewUser;
+                var form = document.getElementById('reportForm');
+
+                form.action = '/owner/reviews/' + reviewId + '/report';
+                document.getElementById('reportArenaName').textContent = arenaName;
+                document.getElementById('reportUserName').textContent = userName;
+            });
+        });
+    });
+</script>
+@endpush
 @endsection
